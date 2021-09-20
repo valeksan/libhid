@@ -1,13 +1,14 @@
 #include "util.hpp"
 
 #include <chrono>
+#include <locale>
+#include <codecvt>
 
-namespace system_info
-{
+namespace system_info {
 
-QString Util::GetTime()
+std::string Util::GetTime()
 {
-   QString timeStr = "[";
+   std::string timeStr = "[";
 
    const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
    std::chrono::system_clock::duration tp = now.time_since_epoch();
@@ -16,18 +17,18 @@ QString Util::GetTime()
    const time_t tt = std::chrono::system_clock::to_time_t(now);
    const tm* currentTime = localtime(&tt);
 
-   timeStr += QString::fromStdString(std::to_string(currentTime->tm_hour) + ":");
-   timeStr += QString::fromStdString(std::to_string(currentTime->tm_min) + ":");
-   timeStr += QString::fromStdString(std::to_string(currentTime->tm_sec) + ":");
-   timeStr += QString::fromStdString(std::to_string(tp/std::chrono::milliseconds(1)));
+   timeStr += std::to_string(currentTime->tm_hour) + ":";
+   timeStr += std::to_string(currentTime->tm_min) + ":";
+   timeStr += std::to_string(currentTime->tm_sec) + ":";
+   timeStr += std::to_string(tp/std::chrono::milliseconds(1));
 
    timeStr += "]";
    return timeStr;
 }
 
-QString Util::HashToUUID(const QString &hash)
+std::string Util::HashToUUID(const std::string &hash)
 {
-   QString uuid = hash;
+   std::string uuid = hash;
 
    SwapUUIDBlocks(uuid, 0, 8);
    SwapUUIDBlocks(uuid, 8, 12);
@@ -43,12 +44,14 @@ QString Util::HashToUUID(const QString &hash)
    return uuid;
 }
 
-QString Util::WstringToString(const std::wstring &ws)
+std::string Util::WstringToString(const std::wstring &ws)
 {
-    return QString::fromStdWString(ws);
+    using convert_typeX = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_typeX, wchar_t> converterX;
+    return converterX.to_bytes(ws);
 }
 
-void Util::SwapUUIDBlocks(QString &uuid, const int begin, const int end)
+void Util::SwapUUIDBlocks(std::string &uuid, const int begin, const int end)
 {
    for (int i = begin; i < (begin + end)/2 ; i += 2) {
       auto temp1 = uuid[i];

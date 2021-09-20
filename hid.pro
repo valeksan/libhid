@@ -25,14 +25,17 @@ win32:{
     HEADERS += imp/windows_manager.hpp
     DEFINES += _WIN32_WINNT=0x0600
     DEFINES += _WIN32_LEAN_AND_MEAN
+    DEFINES += OS_WINDOWS
 }
 linux:{
     SOURCES += imp/linux_manager.cpp
     HEADERS += imp/linux_manager.hpp
+    DEFINES += OS_LINUX
 }
 macx:{
     SOURCES += imp/mac_manager.cpp
     HEADERS += imp/mac_manager.hpp
+    DEFINES += OS_MAC
 }
 
 # Default rules for deployment.

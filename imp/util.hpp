@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <QString>
+#include <string>
 
 namespace system_info
 {
@@ -16,7 +16,7 @@ class Util
     * @brief Получить текущее время
     * @return Время в строковом формате типа [час:мин:сек:мс]
     */
-   static QString GetTime();
+   static std::string GetTime();
 
    /**
     * @brief Сформировать из 32-символьной строки (хеша)
@@ -24,7 +24,7 @@ class Util
     * @param hash 32 символьная строка
     * @return UUID
     */
-   static QString HashToUUID(const QString &hash);
+   static std::string HashToUUID(const std::string &hash);
 
    /**
     * @brief Преобразует строку из широких символов в
@@ -35,7 +35,7 @@ class Util
     * может не распознавать некоторые символы, и таким образом
     * возвращать пустую строку
     */
-   static QString WstringToString(const std::wstring &ws);
+   static std::string WstringToString(const std::wstring &ws);
 
  private:
    /**
@@ -44,7 +44,7 @@ class Util
     * @param begin Начало секции
     * @param end Конец секции
     */
-   static void SwapUUIDBlocks(QString &uuid, const int begin, const int end);
+   static void SwapUUIDBlocks(std::string &uuid, const int begin, const int end);
 };
 
 } // end namespace system_info

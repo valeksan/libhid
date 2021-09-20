@@ -1,17 +1,17 @@
 #include "libhid.h"
 
-#if defined( Q_OS_WIN )
+#if defined(OS_WINDOWS)
 #include "imp/windows_manager.hpp"
-#elif defined( Q_OS_LINUX )
+#elif defined(OS_LINUX)
 #include "imp/linux_manager.hpp"
-#elif defined( Q_OS_MAC )
+#elif defined(OS_MAC)
 #include "imp/mac_manager.hpp"
 #endif
 #include "imp/md5.hpp"
 #include "imp/util.hpp"
 
-#include <QDebug>
 #include <cstring>
+#include <iostream>
 
 using namespace system_info;
 
@@ -19,30 +19,30 @@ Libhid::Libhid()
 {
 }
 
-QString Libhid::GetHardwareId()
+std::string Libhid::GetHardwareId()
 {
-    QString hid = "";
+    std::string hardwareIdResult = "";
     try {
-        qDebug() << "Выполняется метод GetHardwareId";
+#ifdef LIB_DEBUG
+        std::cout << "Выполняется метод GetHardwareId";
+#endif
         // Получаем HID
-        QString hid = NativeOSManager::GetHardwareProperties();
-        if (hid.isEmpty()) {
-            qWarning() << "Не удалось получить ни один из всех идентификаторов железа!";
+        std::string hid = NativeOSManager::GetHardwareProperties();
+        if (hid.empty()) {
+#ifdef LIB_DEBUG
+            std::cerr << "Не удалось получить ни один из всех идентификаторов железа!";
+#endif
             return hid;
         }
         // Получаем MD5 хеш данных о железе - есть наш UUID
-        MD5 md5(hid.toStdString());
-        QString md5hash = QString::fromStdString(md5.HexDigest());
-        QString uuid = Util::HashToUUID(md5hash);
-
-        // Копируем результат в буффер
-        QByteArray data;
-        data.reserve(uuid.size() + 1);
-        std::memset(data.data(), '\0', uuid.size() + 1);
-        std::memcpy(data.data(), uuid.toStdString().c_str(), uuid.size() + 1);
-        hid = QString::fromLatin1(data);
+        MD5 md5(hid);
+        std::string md5hash = md5.HexDigest();
+        std::string uuid = Util::HashToUUID(md5hash);
+        hardwareIdResult = uuid;
     } catch (...) {
-        qWarning() << "Непредсказуемая ошибка в GetHardwareId";
+#ifdef LIB_DEBUG
+        std::cerr << "Непредсказуемая ошибка в GetHardwareId";
+#endif
     }
-    return hid;
+    return hardwareIdResult;
 }

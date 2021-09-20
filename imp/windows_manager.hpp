@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QString>
+#include <string>
 
 // Предварительное объявление
 struct IWbemServices;
@@ -9,11 +9,7 @@ using GUID = struct _GUID;
 using CLSID = GUID;
 using IID = GUID;
 
-namespace system_info
-{
-
-// Предварительное объявление
-struct Version;
+namespace system_info {
 
 /**
  * @brief Класс для работы с железом
@@ -28,7 +24,7 @@ class NativeOSManager
     * @return Строка с идентификаторами железа, следующими
     * друг за другом
     */
-   static QString GetHardwareProperties();
+   static std::string GetHardwareProperties();
  private:
    /**
     * @brief Перевести строку в нижний регистр

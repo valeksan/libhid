@@ -7,11 +7,9 @@
 
 // Standart include
 #include <algorithm>
+#include <iostream>
 
-#include <QDebug>
-
-namespace system_info
-{
+namespace system_info {
 
 struct BSTRHolder
 {
@@ -19,14 +17,12 @@ struct BSTRHolder
    {
       bstr = SysAllocString(str);
    }
-
    ~BSTRHolder()
    {
       if (bstr) {
          SysFreeString(bstr);
       }
    }
-
    BSTR bstr;
 };
 
@@ -35,7 +31,7 @@ const CLSID NativeOSManager::local_CLSID_WbemLocator = {0x4590F811, 0x1D3A, 0x11
 const IID NativeOSManager::local_IID_IWbemLocator = {0xdc12a687, 0x737f, 0x11cf, {0x88, 0x4d, 0, 0xAA, 0, 0x4B, 0x2E, 0x24}};
 
 // version пока не используем
-QString NativeOSManager::GetHardwareProperties()
+std::string NativeOSManager::GetHardwareProperties()
 {
    std::wstring hardwareId = L"";
 
@@ -119,7 +115,7 @@ std::wstring NativeOSManager::GetWmiPropertyForHdd(IWbemServices *services, bool
       CoTaskMemFree(location);
       return GetWmiProperty(services, from.c_str(), L"VolumeSerialNumber", check);
    }
-   qWarning() << "Идентификатор раздела жесткого диска не удалось получить";
+   std::cerr << "Идентификатор раздела жесткого диска не удалось получить";
    return std::wstring();
 }
 

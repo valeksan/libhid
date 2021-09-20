@@ -1,14 +1,14 @@
 #ifndef LIBHID_H
 #define LIBHID_H
 
-#include <QString>
+#include <string>
 
 class Libhid
 {
 public:
     Libhid();
 
-    static QString GetHardwareId();
+    static std::string GetHardwareId();
 };
 
 #endif // LIBHID_H
