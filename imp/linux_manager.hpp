@@ -3,11 +3,9 @@
 #include <string>
 #include <vector>
 
-namespace system_info
-{
+#include <QString>
 
-// Предварительное объявление
-struct Version;
+namespace system_info {
 
 /**
  * @brief Класс для работы с железом
@@ -18,11 +16,10 @@ class NativeOSManager
 public:
    /**
     * @brief Получить строку с идентификаторами железа
-    * @param hidVersion Версия алгоритма
     * @return Строка с идентификаторами железа, следующими друг
     * за другом
     */
-   static std::string GetHardwareProperties( const Version& hidVersion );
+   static QString GetHardwareProperties();
 private:
    /**
     * @brief Получить свойство DMI
@@ -30,7 +27,7 @@ private:
     * @param property Целевое свойство
     * @return Значение свойства указанного сервиса
     */
-   static std::string GetDmiProperty( const std::string& service, const std::string& property );
+   static std::string GetDmiProperty(const std::string &service, const std::string &property);
 
    /**
     * @brief Получить серийный номер жесткого диска
@@ -51,7 +48,7 @@ private:
     * @param type Тип искомых объектов
     * @return True - если все ок, иначе false
     */
-   static bool GetItemsFromFolder( const std::string& folder, std::vector< std::string >& itemList, int type );
+   static bool GetItemsFromFolder(const std::string &folder, std::vector<std::string> &itemList, int type);
 };
 
 } // end namespace system_info

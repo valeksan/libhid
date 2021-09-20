@@ -3,9 +3,9 @@
 #if defined( Q_OS_WIN )
 #include "imp/windows_manager.hpp"
 #elif defined( Q_OS_LINUX )
-#include "implementation/linux/linux_manager.hpp"
+#include "imp/linux_manager.hpp"
 #elif defined( Q_OS_MAC )
-#include "implementation/mac/mac_manager.hpp"
+#include "imp/mac_manager.hpp"
 #endif
 #include "imp/md5.hpp"
 #include "imp/util.hpp"
