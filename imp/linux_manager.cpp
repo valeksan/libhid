@@ -11,7 +11,7 @@
 
 namespace system_info {
 
-QString NativeOSManager::GetHardwareProperties()
+std::string NativeOSManager::GetHardwareProperties()
 {
     std::string result = "";
 
@@ -21,7 +21,7 @@ QString NativeOSManager::GetHardwareProperties()
     result += GetHDDSerialNumber();
     result += GetMACAddress();
 
-    return QString::fromStdString(result);
+    return result;
 }
 
 std::string NativeOSManager::GetDmiProperty(const std::string &service, const std::string &property)
@@ -126,7 +126,7 @@ std::string NativeOSManager::GetMACAddress()
     return "";
 }
 
-bool NativeOSManager::GetItemsFromFolder(const std::string &folder, std::vector<std::string> &itemList , int type)
+bool NativeOSManager::GetItemsFromFolder(const std::string &folder, std::vector<std::string> &itemList, int type)
 {
     DIR *dir = nullptr;
     if (!(dir = opendir(folder.c_str()))) {

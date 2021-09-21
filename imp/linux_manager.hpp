@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <QString>
-
 namespace system_info {
 
 /**
@@ -13,14 +11,15 @@ namespace system_info {
  */
 class NativeOSManager
 {
-public:
+ public:
    /**
     * @brief Получить строку с идентификаторами железа
     * @return Строка с идентификаторами железа, следующими друг
     * за другом
     */
-   static QString GetHardwareProperties();
-private:
+   static std::string GetHardwareProperties();
+
+ private:
    /**
     * @brief Получить свойство DMI
     * @param service Целевой сервис
