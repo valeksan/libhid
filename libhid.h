@@ -3,9 +3,8 @@
 
 #include <string>
 
-class Libhid
-{
-public:
+class Libhid {
+ public:
     Libhid();
 
     static std::string GetHardwareId();

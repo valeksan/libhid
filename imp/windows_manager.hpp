@@ -2,7 +2,6 @@
 
 #include <string>
 
-// Предварительное объявление
 struct IWbemServices;
 using BSTR = wchar_t*;
 using GUID = struct _GUID;
@@ -12,72 +11,67 @@ using IID = GUID;
 namespace system_info {
 
 /**
- * @brief Класс для работы с железом
- * в ОС Windows
+ * @brief Class for getting information about computer hardware
+ * in OS Windows
  */
-class NativeOSManager
-{
+class NativeOSManager {
  public:
-   /**
-    * @brief Получить строку с идентификаторами железа (обертка)
-    * @param version Версия алгоритма
-    * @return Строка с идентификаторами железа, следующими
-    * друг за другом
-    */
-   static std::string GetHardwareProperties();
- private:
-   /**
-    * @brief Перевести строку в нижний регистр
-    * @param string Результат с символами в нижнем регистре
-    */
-   static void ToLower(std::wstring &string);
-
-   /**
-    * @brief Получить строку с идентификаторами железа
-    * @param hidVeriosn Версия алгоритма
-    * @return Строка с идентификаторами железа, следующими
-    * друг за другом
-    */
-   static std::wstring GetWmiProperties();
-
-   /**
-    * @brief Получить значение свойства класса через WMI
-    * @param services Интерфейс для взаимодействия с WMI
-    * @param classname Целевой класс
-    * @param property Целевое свойство класса
-    * @param check Проверка на пустое значение
-    * @return Значение указанного свойства класса
-    */
-   static std::wstring GetWmiProperty(IWbemServices *services, const wchar_t *classname, const wchar_t *property, bool check = true);
-
-   /**
-    * @brief Получить идентификатор раздела жесткого диска
-    * @param services Интерфейс для взаимодействия с WMI
-    * @param check Алгоритм старше версии 1.2?
-    * @return Значение идентификатора раздела жесткого диска
-    */
-   static std::wstring GetWmiPropertyForHdd(IWbemServices *services, bool check);
-
-   /**
-    * @brief Получить MAC-адрес
-    * @param services Интерфейс для взаимодействия с WMI
-    * @return Значние MAC-адреса
-    */
-   static std::wstring GetWmiPropertyForNetworkAdapter(IWbemServices *services);
-
-   /**
-    * @brief Обработать системное значение
-    * @param prop Строка в формате BSTR
-    * @param check Проверка на пустое значение. Если
-    * включена, то пустое системное значние будет трактовано
-    * как пустая строка
-    * @return Значение в формате std::wstring
-    */
-   static std::wstring ProcessWmiProperty(BSTR prop, bool check);
+    /**
+     * @brief Get a string with iron identifiers (wrapper)
+     * @return String with hardware identifiers following one after another
+     */
+    static std::string GetHardwareProperties();
 
  private:
-   const static CLSID local_CLSID_WbemLocator;
-   const static IID local_IID_IWbemLocator;
+    /**
+     * @brief Convert string to lowercase
+     * @param string Result with lowercase characters
+     */
+    static void ToLower(std::wstring &string);
+
+    /**
+     * @brief Get a string with hardware identifiers
+     * @return String with hardware identifiers following one after another
+     */
+    static std::wstring GetWmiProperties();
+
+    /**
+     * @brief Get the value of a class property via WMI
+     * @param services Interface for interacting with WMI
+     * @param classname Target class
+     * @param property Target property of the class
+     * @param check Checking for empty value
+     * @return The value of the specified class property
+     */
+    static std::wstring GetWmiProperty(IWbemServices *services, const wchar_t *classname, const wchar_t *property, bool check = true);
+
+    /**
+     * @brief Get hard disk partition ID
+     * @param services Interface for interacting with WMI
+     * @param check Is the algorithm older than version 1.2?
+     * @return Hard disk partition ID value
+     */
+    static std::wstring GetWmiPropertyForHdd(IWbemServices *services, bool check);
+
+    /**
+     * @brief Get MAC-address
+     * @param services Interface for interacting with WMI
+     * @return MAC-address value
+     */
+    static std::wstring GetWmiPropertyForNetworkAdapter(IWbemServices *services);
+
+    /**
+     * @brief Process system value
+     * @param prop BSTR string
+     * @param check Checking for an empty value.
+     * If enabled, an empty system value will be treated as an empty string
+     * @return std::wstring value
+     */
+    static std::wstring ProcessWmiProperty(BSTR prop, bool check);
+
+ private:
+    const static CLSID local_CLSID_WbemLocator;
+    const static IID local_IID_IWbemLocator;
 };
 
 } // end namespace system_info

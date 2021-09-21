@@ -26,11 +26,10 @@ struct BSTRHolder
    BSTR bstr;
 };
 
-// В mingw CLSID_WbemLocator и IID_IWbemLocator выдают undefined reference, используем свой "аналог"
+// In mingw CLSID_WbemLocator and IID_IWbemLocator give undefined reference, we use our "analog"
 const CLSID NativeOSManager::local_CLSID_WbemLocator = {0x4590F811, 0x1D3A, 0x11D0, {0x89, 0x1F, 0, 0xAA, 0, 0x4B, 0x2E, 0x24}};
 const IID NativeOSManager::local_IID_IWbemLocator = {0xdc12a687, 0x737f, 0x11cf, {0x88, 0x4d, 0, 0xAA, 0, 0x4B, 0x2E, 0x24}};
 
-// version пока не используем
 std::string NativeOSManager::GetHardwareProperties()
 {
    std::wstring hardwareId = L"";
@@ -115,7 +114,9 @@ std::wstring NativeOSManager::GetWmiPropertyForHdd(IWbemServices *services, bool
       CoTaskMemFree(location);
       return GetWmiProperty(services, from.c_str(), L"VolumeSerialNumber", check);
    }
-   std::cerr << "Идентификатор раздела жесткого диска не удалось получить";
+#ifdef LIB_DEBUG
+   std::cerr << "Hard disk partition ID could not be retrieved! " << std::endl;
+#endif
    return std::wstring();
 }
 
@@ -123,7 +124,7 @@ std::wstring NativeOSManager::ProcessWmiProperty(BSTR prop, bool check)
 {
    std::wstring value(prop, SysStringLen(prop));
    ToLower(value);
-   // Внимание: все константы в нижнем регистре
+   // Attention: all constants are lowercase
    const std::wstring empty_guid(L"00000000-0000-0000-0000-000000000000");
    const std::wstring broken_guid(L"ffffffff-ffff-ffff-ffff-ffffffffffff");
    const std::wstring empty_oem(L"to be filled by o.e.m.");

@@ -35,67 +35,67 @@ std::string NativeOSManager::GetDmiProperty(const std::string &service, const st
     }
 
 #ifdef LIB_DEBUG
-    std::cout << "Значение свойства \'" << property << "\' для \'" << service << "\'" << " = \'" << result << "\'";
+    std::cout << "Property value \'" << property << "\' for \'" << service << "\'" << " = \'" << result << "\' " << std::endl;
 #endif
     return result;
 }
 
 std::string NativeOSManager::GetHDDSerialNumber()
 {
-    // Открываем директорию с идентификаторами жестких дисков
+    // Open the directory with hard disk identifiers
     const std::string uuidFolder = "/dev/disk/by-uuid/";
     std::vector<std::string> uuids;
 
     if (!GetItemsFromFolder(uuidFolder, uuids, DT_LNK)) {
 #ifdef LIB_DEBUG
-        std::cerr << "Не смогли получить список идентификаторов в папке /dev/disk/by-uuid/";
+        std::cerr << "Couldn't get the list of IDs in '/dev/disk/by-uuid/' folder! " << std::endl;
 #endif
         return "";
     }
 
-    // Формируем словарь "служебное имя жесткого диска - UUID"
-    // Коллекция упорядочена по ключу
+    // Forming a dictionary "hard disk service name - UUID"
+    // Collection sorted by key
     std::map<std::string, std::string> devices;
     char buffer[200];
     for (const std::string &uuid : uuids) {
         std::string uuidPath = uuidFolder + uuid;
         realpath(uuidPath.c_str(), buffer);
-        // Вставка происходит с сортировкой по ключу
+        // Insertion occurs with sorting by key
         devices[buffer] = uuid;
     }
 
-    // Находим самое раннее имя sda или hda и возвращаем его UUID
+    // Find the earliest sda or hda name and return its UUID
     for (const auto &item : devices) {
         if (item.first.find("sda") != std::string::npos ||
                 item.first.find("hda") != std::string::npos)
         {
 #ifdef LIB_DEBUG
-            std::cout << "Серийный номер жесткого диска: " + item.second;
+            std::cout << "Hard disk serial number: " << item.second << " " << std::endl;
 #endif
             return item.second;
         }
     }
 #ifdef LIB_DEBUG
-    std::cerr << "Не смогли получить серийный номер жесткого диска";
+    std::cerr << "Couldn't get the serial number of the hard drive! " << std::endl;
 #endif
     return "";
 }
 
 std::string NativeOSManager::GetMACAddress()
 {
-    // Открываем директорию с именами сетевых интерфейсов
+    // Open the directory with the names of network interfaces
     const std::string netFolder = "/sys/class/net/";
     std::vector<std::string> netNames;
 
     if (!GetItemsFromFolder(netFolder, netNames, DT_LNK)) {
 #ifdef LIB_DEBUG
-        std::cerr << "Не смогли получить список идентификаторов в папке /sys/class/net/";
+        std::cerr << "Couldn't get list of IDs in '/sys/class/net/' folder! " << std::endl;
 #endif
         return "";
     }
 
-    // Формируем словарь "служебное имя сетевого устройства - сетевой адрес"
-    // Коллекция упорядочена по ключу
+    // We form the dictionary "service name of the network device - network address"
+    // Collection sorted by key
     std::map<std::string, std::string> netDevices;
     std::string tempAddress = "";
     for (const std::string &netName : netNames) {
@@ -109,19 +109,19 @@ std::string NativeOSManager::GetMACAddress()
         netDevices[netName] = tempAddress;
     }
 
-    // Находим самое раннее имя eth или enp и возвращаем его сетевой адрес
+    // Find the earliest eth or enp name and return its network address
     for (const auto &item : netDevices) {
         if (item.first.find("eth") != std::string::npos
-                || item.first.find( "enp" ) != std::string::npos)
+                || item.first.find("enp") != std::string::npos)
         {
 #ifdef LIB_DEBUG
-            std::cout << "MAC-адрес: " + item.second;
+            std::cout << "MAC-Address: " << item.second << " " << std::endl;
 #endif
             return item.second;
         }
     }
 #ifdef LIB_DEBUG
-    std::cerr << "Не смогли получить MAC-адрес";
+    std::cerr << "Couldn't get MAC-Address! " << std::endl;
 #endif
     return "";
 }

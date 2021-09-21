@@ -6,48 +6,46 @@
 namespace system_info {
 
 /**
- * @brief Класс для работы с железом
- * в ОС Linux
+ * @brief Class for getting information about computer hardware
+ * in OS Linux
  */
-class NativeOSManager
-{
+class NativeOSManager {
  public:
-   /**
-    * @brief Получить строку с идентификаторами железа
-    * @return Строка с идентификаторами железа, следующими друг
-    * за другом
-    */
-   static std::string GetHardwareProperties();
+    /**
+     * @brief Get a string with hardware identifiers
+     * @return A string with hardware IDs following each other
+     */
+    static std::string GetHardwareProperties();
 
  private:
-   /**
-    * @brief Получить свойство DMI
-    * @param service Целевой сервис
-    * @param property Целевое свойство
-    * @return Значение свойства указанного сервиса
-    */
-   static std::string GetDmiProperty(const std::string &service, const std::string &property);
+    /**
+     * @brief Get DMI Property
+     * @param service Target service
+     * @param property Target property
+     * @return Property value of the specified service
+     */
+    static std::string GetDmiProperty(const std::string &service, const std::string &property);
 
-   /**
-    * @brief Получить серийный номер жесткого диска
-    * @return Серийный номер жесткого диска
-    */
-   static std::string GetHDDSerialNumber();
+    /**
+     * @brief Get the serial number of the hard drive
+     * @return Hard disk serial number
+     */
+    static std::string GetHDDSerialNumber();
 
-   /**
-    * @brief Получить МАС-адрес
-    * @return МАС-адрес сетевого устройства
-    */
-   static std::string GetMACAddress();
+    /**
+     * @brief Get MAC-Address
+     * @return MAC-Address of the network device
+     */
+    static std::string GetMACAddress();
 
-   /**
-    * @brief Получить дочерние объекты указанного типа из директории
-    * @param folder Директория
-    * @param itemList Результат (список объектов)
-    * @param type Тип искомых объектов
-    * @return True - если все ок, иначе false
-    */
-   static bool GetItemsFromFolder(const std::string &folder, std::vector<std::string> &itemList, int type);
+    /**
+     * @brief Get child objects of the specified type from the directory
+     * @param folder Directory
+     * @param itemList Result (list of objects)
+     * @param type Type of objects to be searched
+     * @return true if everything is ok, otherwise false
+     */
+    static bool GetItemsFromFolder(const std::string &folder, std::vector<std::string> &itemList, int type);
 };
 
 } // end namespace system_info

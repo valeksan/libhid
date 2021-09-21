@@ -23,25 +23,22 @@ std::string Libhid::GetHardwareId()
 {
     std::string hardwareIdResult = "";
     try {
-#ifdef LIB_DEBUG
-        std::cout << "Выполняется метод GetHardwareId";
-#endif
-        // Получаем HID
+        // Getting HID
         std::string hid = NativeOSManager::GetHardwareProperties();
         if (hid.empty()) {
 #ifdef LIB_DEBUG
-            std::cerr << "Не удалось получить ни один из всех идентификаторов железа!";
+            std::cerr << "Couldn't get any of all hardware IDs! " << std::endl;
 #endif
             return hid;
         }
-        // Получаем MD5 хеш данных о железе - есть наш UUID
+        // Getting MD5 hash of data about hardware - there is our UUID
         MD5 md5(hid);
         std::string md5hash = md5.HexDigest();
         std::string uuid = Util::HashToUUID(md5hash);
         hardwareIdResult = uuid;
     } catch (...) {
 #ifdef LIB_DEBUG
-        std::cerr << "Непредсказуемая ошибка в GetHardwareId";
+        std::cerr << "Unpredictable error in GetHardwareId! " << std::endl;
 #endif
     }
     return hardwareIdResult;
