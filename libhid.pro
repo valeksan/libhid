@@ -1,9 +1,7 @@
-QT -= gui
+QT -= qt
 
 TEMPLATE = lib
-CONFIG += staticlib
-TARGET = hid
-
+DEFINES += SHAREDTESTLIB_LIBRARY
 CONFIG += c++11
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -26,6 +24,7 @@ win32:{
     DEFINES += _WIN32_WINNT=0x0600
     DEFINES += _WIN32_LEAN_AND_MEAN
     DEFINES += OS_WINDOWS
+    LIBS += -lole32 -loleaut32 -lshell32
 }
 linux:{
     SOURCES += imp/linux_manager.cpp
@@ -38,10 +37,11 @@ macx:{
     DEFINES += OS_MAC
 }
 
+DESTDIR = "$$PWD/../libs"
 CONFIG(release, debug|release): {
-    DESTDIR="$$PWD/build/release"
+    #
 } else {
-    DESTDIR="$$PWD/build/debug"
+
     DEFINES += LIB_DEBUG
 }
 

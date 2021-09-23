@@ -15,11 +15,11 @@
 
 using namespace system_info;
 
-Libhid::Libhid()
+LibHid::LibHid()
 {
 }
 
-std::string Libhid::GetHardwareId()
+std::string LibHid::GetHardwareId()
 {
     std::string hardwareIdResult = "";
     try {
