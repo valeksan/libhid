@@ -26,6 +26,9 @@ win32:{
     DEFINES += OS_WINDOWS
     LIBS += -lole32 -loleaut32 -lshell32
 }
+win32:mingw {
+    DEFINES += INITGUID
+}
 linux:{
     SOURCES += imp/linux_manager.cpp
     HEADERS += imp/linux_manager.hpp

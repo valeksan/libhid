@@ -9,6 +9,10 @@
 #include <algorithm>
 #include <iostream>
 
+#ifdef __MINGW32__
+#include <KnownFolders.h>
+#endif
+
 namespace system_info {
 
 struct BSTRHolder
