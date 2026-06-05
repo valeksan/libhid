@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(libhid
+    VERSION 0.1.0
     LANGUAGES CXX
 )
 
 include(GNUInstallDirs)
+
+option(LIBHID_ENABLE_WARNINGS "Enable additional compiler warnings for libhid developers" ON)
+option(LIBHID_BUILD_EXAMPLES "Build libhid example applications" ON)
 
 add_library(libhid SHARED)
 
@@ -38,6 +42,14 @@ target_compile_definitions(libhid
         LIBHID_LIBRARY
         $<$<CONFIG:Debug>:LIB_DEBUG>
 )
+
+if(LIBHID_ENABLE_WARNINGS)
+    if(MSVC)
+        target_compile_options(libhid PRIVATE /W4)
+    else()
+        target_compile_options(libhid PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endif()
 
 if(WIN32)
     set_target_properties(libhid
@@ -100,6 +112,8 @@ endif()
 
 set_target_properties(libhid
     PROPERTIES
+        VERSION "${PROJECT_VERSION}"
+        SOVERSION "${PROJECT_VERSION_MAJOR}"
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
@@ -113,3 +127,14 @@ install(TARGETS libhid
 
 install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
+
+if(LIBHID_BUILD_EXAMPLES)
+    add_executable(libhid_print_hardware_id examples/print_hardware_id.cpp)
+
+    target_link_libraries(libhid_print_hardware_id PRIVATE libhid)
+
+    set_target_properties(libhid_print_hardware_id
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
+    )
+endif()

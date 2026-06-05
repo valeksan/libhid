@@ -56,6 +56,8 @@ The returned value is a UUID-like string, for example:
 
 ## Build With CMake
 
+Current library version: `0.1.0`.
+
 Requirements:
 
 - CMake 3.16 or newer.
@@ -68,6 +70,18 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
+Developer warnings are enabled by default. They can be disabled with:
+
+```sh
+cmake -S . -B build -DLIBHID_ENABLE_WARNINGS=OFF
+```
+
+Example applications are enabled by default. They can be disabled with:
+
+```sh
+cmake -S . -B build -DLIBHID_BUILD_EXAMPLES=OFF
+```
+
 The built library is written to `../libs` relative to the project directory.
 
 On Windows with MinGW, the output files are named:
@@ -75,7 +89,18 @@ On Windows with MinGW, the output files are named:
 ```text
 libhid.dll
 libhid.dll.a
+libhid_print_hardware_id.exe
 ```
+
+Run the example:
+
+```sh
+../libs/libhid_print_hardware_id
+```
+
+When running a MinGW build manually on Windows, make sure the compiler runtime
+DLLs are available in `PATH`. Qt Creator usually configures this environment
+automatically.
 
 ## Build In Qt Creator
 
