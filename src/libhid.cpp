@@ -1,4 +1,4 @@
-#include "libhid.h"
+#include "libhid/libhid.h"
 
 #if defined(OS_WINDOWS)
 #include "imp/windows_manager.hpp"

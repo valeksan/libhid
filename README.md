@@ -29,7 +29,7 @@ virtual machine changes, or restricted OS permissions.
 ## Public API
 
 ```cpp
-#include "libhid.h"
+#include "libhid/libhid.h"
 
 #include <iostream>
 #include <string>
@@ -84,6 +84,9 @@ Qt Creator will create its own local build directory, which is ignored by Git.
 
 The old `libhid.pro` file is kept temporarily for compatibility during migration
 from qmake to CMake.
+
+The recommended public include path is `libhid/libhid.h`. A compatibility
+wrapper is also kept at `libhid.h` for existing code.
 
 ## Notes For Developers
 

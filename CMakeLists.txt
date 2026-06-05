@@ -10,11 +10,12 @@ add_library(libhid SHARED)
 
 target_sources(libhid
     PRIVATE
-        imp/md5.cpp
-        imp/md5.hpp
-        imp/util.cpp
-        imp/util.hpp
-        libhid.cpp
+        src/imp/md5.cpp
+        src/imp/md5.hpp
+        src/imp/util.cpp
+        src/imp/util.hpp
+        src/libhid.cpp
+        include/libhid/libhid.h
         libhid.h
 )
 
@@ -26,7 +27,10 @@ target_compile_features(libhid
 target_include_directories(libhid
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
 target_compile_definitions(libhid
@@ -44,8 +48,8 @@ if(WIN32)
 
     target_sources(libhid
         PRIVATE
-            imp/windows_manager.cpp
-            imp/windows_manager.hpp
+            src/imp/windows_manager.cpp
+            src/imp/windows_manager.hpp
     )
 
     target_compile_definitions(libhid
@@ -71,8 +75,8 @@ elseif(APPLE)
 
     target_sources(libhid
         PRIVATE
-            imp/mac_manager.cpp
-            imp/mac_manager.hpp
+            src/imp/mac_manager.cpp
+            src/imp/mac_manager.hpp
     )
 
     target_compile_definitions(libhid PRIVATE OS_MAC)
@@ -85,8 +89,8 @@ elseif(APPLE)
 elseif(UNIX)
     target_sources(libhid
         PRIVATE
-            imp/linux_manager.cpp
-            imp/linux_manager.hpp
+            src/imp/linux_manager.cpp
+            src/imp/linux_manager.hpp
     )
 
     target_compile_definitions(libhid PRIVATE OS_LINUX)
@@ -108,3 +112,4 @@ install(TARGETS libhid
 )
 
 install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
