@@ -54,6 +54,33 @@ The returned value is a UUID-like string, for example:
 01234567-89ab-cdef-0123-456789abcdef
 ```
 
+`GetHardwareId()` may return an empty string if the operating system does not
+expose the required hardware properties or if access to those properties is
+restricted. Callers should treat an empty value as "hardware ID unavailable" and
+decide on an application-specific fallback.
+
+## Identifier Stability
+
+The generated ID is intended to be stable for the same machine while the
+underlying hardware and OS-reported values remain stable. It can change after:
+
+- Reinstalling or significantly reconfiguring the operating system.
+- Replacing disks, network adapters, motherboard, or other hardware.
+- Running inside a different virtual machine configuration.
+- Losing permissions to read platform-specific hardware properties.
+
+The value is useful as a practical machine fingerprint, but it is not a permanent
+or tamper-proof device identity.
+
+## Security Notes
+
+`libhid` uses MD5 only to normalize collected hardware properties into a compact
+UUID-like string. It is not used as a cryptographic security primitive.
+
+Do not rely on this ID as the only proof for licensing, authentication, or access
+control. For security-sensitive systems, combine it with server-side validation,
+signed license data, user accounts, or another trusted mechanism.
+
 ## Build With CMake
 
 Current library version: `0.1.0`.
@@ -148,6 +175,22 @@ from qmake to CMake.
 
 The recommended public include path is `libhid/libhid.h`. A compatibility
 wrapper is also kept at `libhid.h` for existing code.
+
+## Migrating From qmake
+
+The project now uses CMake as the primary build system. Existing qmake users can
+temporarily continue using `libhid.pro`, but new integrations should prefer
+`CMakeLists.txt`.
+
+Recommended migration path:
+
+- Open or import `CMakeLists.txt` instead of `libhid.pro`.
+- Replace direct source-file inclusion with linking to `libhid` or
+  `libhid::libhid`.
+- Prefer `#include "libhid/libhid.h"` for new code.
+- Keep `#include "libhid.h"` only for existing code that has not been migrated
+  yet.
+- Remove qmake-specific build assumptions from downstream projects over time.
 
 ## Continuous Integration
 
