@@ -6,11 +6,14 @@ project(libhid
 )
 
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 option(LIBHID_ENABLE_WARNINGS "Enable additional compiler warnings for libhid developers" ON)
 option(LIBHID_BUILD_EXAMPLES "Build libhid example applications" ON)
+option(LIBHID_INSTALL "Generate libhid install rules" ON)
 
 add_library(libhid SHARED)
+add_library(libhid::libhid ALIAS libhid)
 
 target_sources(libhid
     PRIVATE
@@ -119,14 +122,43 @@ set_target_properties(libhid
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
 )
 
-install(TARGETS libhid
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-)
+if(LIBHID_INSTALL)
+    set(libhid_cmake_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/libhid")
 
-install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
+    install(TARGETS libhid
+        EXPORT libhidTargets
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+
+    install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
+
+    install(EXPORT libhidTargets
+        FILE libhidTargets.cmake
+        NAMESPACE libhid::
+        DESTINATION "${libhid_cmake_install_dir}"
+    )
+
+    configure_package_config_file(
+        cmake/libhidConfig.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/libhidConfig.cmake"
+        INSTALL_DESTINATION "${libhid_cmake_install_dir}"
+    )
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/libhidConfigVersion.cmake"
+        VERSION "${PROJECT_VERSION}"
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/libhidConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/libhidConfigVersion.cmake"
+        DESTINATION "${libhid_cmake_install_dir}"
+    )
+endif()
 
 if(LIBHID_BUILD_EXAMPLES)
     add_executable(libhid_print_hardware_id examples/print_hardware_id.cpp)

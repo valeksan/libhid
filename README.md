@@ -82,6 +82,12 @@ Example applications are enabled by default. They can be disabled with:
 cmake -S . -B build -DLIBHID_BUILD_EXAMPLES=OFF
 ```
 
+Install rules are enabled by default. They can be disabled with:
+
+```sh
+cmake -S . -B build -DLIBHID_INSTALL=OFF
+```
+
 The built library is written to `../libs` relative to the project directory.
 
 On Windows with MinGW, the output files are named:
@@ -101,6 +107,24 @@ Run the example:
 When running a MinGW build manually on Windows, make sure the compiler runtime
 DLLs are available in `PATH`. Qt Creator usually configures this environment
 automatically.
+
+## Use From Another CMake Project
+
+After installing `libhid`, consume it with:
+
+```cmake
+find_package(libhid CONFIG REQUIRED)
+
+target_link_libraries(your_app PRIVATE libhid::libhid)
+```
+
+When using the repository directly as a subproject:
+
+```cmake
+add_subdirectory(path/to/libhid)
+
+target_link_libraries(your_app PRIVATE libhid::libhid)
+```
 
 ## Build In Qt Creator
 
