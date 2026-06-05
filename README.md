@@ -70,6 +70,12 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
+Run tests:
+
+```sh
+ctest --test-dir build --output-on-failure
+```
+
 Developer warnings are enabled by default. They can be disabled with:
 
 ```sh
@@ -80,6 +86,12 @@ Example applications are enabled by default. They can be disabled with:
 
 ```sh
 cmake -S . -B build -DLIBHID_BUILD_EXAMPLES=OFF
+```
+
+Tests are enabled by default. They can be disabled with:
+
+```sh
+cmake -S . -B build -DLIBHID_BUILD_TESTS=OFF
 ```
 
 Install rules are enabled by default. They can be disabled with:

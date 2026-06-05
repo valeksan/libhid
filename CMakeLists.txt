@@ -10,6 +10,7 @@ include(CMakePackageConfigHelpers)
 
 option(LIBHID_ENABLE_WARNINGS "Enable additional compiler warnings for libhid developers" ON)
 option(LIBHID_BUILD_EXAMPLES "Build libhid example applications" ON)
+option(LIBHID_BUILD_TESTS "Build libhid tests" ON)
 option(LIBHID_INSTALL "Generate libhid install rules" ON)
 
 add_library(libhid SHARED)
@@ -169,4 +170,19 @@ if(LIBHID_BUILD_EXAMPLES)
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
     )
+endif()
+
+if(LIBHID_BUILD_TESTS)
+    enable_testing()
+
+    add_executable(libhid_smoke_test tests/smoke.cpp)
+
+    target_link_libraries(libhid_smoke_test PRIVATE libhid)
+
+    set_target_properties(libhid_smoke_test
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
+    )
+
+    add_test(NAME libhid_smoke_test COMMAND libhid_smoke_test)
 endif()
