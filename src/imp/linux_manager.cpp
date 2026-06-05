@@ -4,7 +4,8 @@
 // Linux include specific
 #include <dirent.h>
 
-// Standart include
+// Standard include
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -56,12 +57,15 @@ std::string NativeOSManager::GetHDDSerialNumber()
     // Forming a dictionary "hard disk service name - UUID"
     // Collection sorted by key
     std::map<std::string, std::string> devices;
-    char buffer[200];
     for (const std::string &uuid : uuids) {
         std::string uuidPath = uuidFolder + uuid;
-        realpath(uuidPath.c_str(), buffer);
+        char *resolvedPath = realpath(uuidPath.c_str(), nullptr);
+        if (!resolvedPath) {
+            continue;
+        }
         // Insertion occurs with sorting by key
-        devices[buffer] = uuid;
+        devices[resolvedPath] = uuid;
+        std::free(resolvedPath);
     }
 
     // Find the earliest sda or hda name and return its UUID
