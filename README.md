@@ -194,7 +194,7 @@ Recommended migration path:
 
 ## Continuous Integration
 
-GitHub Actions builds and tests the CMake project on Windows and Linux in Debug
+GitHub Actions builds and tests the CMake project on Windows, Linux, and macOS in Debug
 and Release configurations. The workflow also verifies the install step so the
 CMake package export remains usable by downstream projects.
 

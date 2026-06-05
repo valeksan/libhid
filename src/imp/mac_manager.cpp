@@ -5,18 +5,22 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 // STD include
+#include <cstdint>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 namespace system_info {
 
+std::string CFStringToStdString(CFStringRef cfStr);
+
 struct CFStringWrapper {
-    CFStringWrapper(CFStringRef cfStr)
+    explicit CFStringWrapper(CFStringRef cfStr)
     {
         this->cfStr = cfStr;
     }
 
-    CFStringWrapper(const std::string str)
+    explicit CFStringWrapper(const std::string &str)
     {
         cfStr = CFStringCreateWithCString(kCFAllocatorDefault, str.c_str(), kCFStringEncodingASCII);
 
@@ -26,21 +30,35 @@ struct CFStringWrapper {
 
     ~CFStringWrapper()
     {
-        CFRelease(cfStr);
+        if (cfStr) {
+            CFRelease(cfStr);
+        }
     }
 
-    std::string GetStdString()
+    CFStringWrapper(const CFStringWrapper&) = delete;
+    CFStringWrapper& operator=(const CFStringWrapper&) = delete;
+
+    std::string GetStdString() const
     {
-        if (cfStr ) {
-            char buffer[ 500 ];
-            if (CFStringGetCString(cfStr, buffer, 500, kCFStringEncodingASCII))
-                return std::string(buffer);
-        }
-        return "";
+        return CFStringToStdString(cfStr);
     }
 
     CFStringRef cfStr = nullptr;
 };
+
+std::string CFStringToStdString(CFStringRef cfStr)
+{
+    if (!cfStr) {
+        return "";
+    }
+
+    const CFIndex maxSize = CFStringGetMaximumSizeForEncoding(CFStringGetLength(cfStr), kCFStringEncodingUTF8) + 1;
+    std::vector<char> buffer(static_cast<std::size_t>(maxSize));
+    if (CFStringGetCString(cfStr, buffer.data(), maxSize, kCFStringEncodingUTF8)) {
+        return std::string(buffer.data());
+    }
+    return "";
+}
 
 std::string NativeOSManager::GetHardwareProperties()
 {
@@ -63,9 +81,14 @@ std::string NativeOSManager::GetIOPlatformProperty(const std::string &property)
 
     if (service) {
         CFTypeRef registryPropertyVoidCF = IORegistryEntryCreateCFProperty(service, propertyCF.cfStr, 0, 0);
-        CFStringWrapper registryPropertyCF((CFStringRef)registryPropertyVoidCF);
-
-        result = registryPropertyCF.GetStdString();
+        if (registryPropertyVoidCF) {
+            if (CFGetTypeID(registryPropertyVoidCF) == CFStringGetTypeID()) {
+                CFStringWrapper registryPropertyCF((CFStringRef)registryPropertyVoidCF);
+                result = registryPropertyCF.GetStdString();
+            } else {
+                CFRelease(registryPropertyVoidCF);
+            }
+        }
         IOObjectRelease(service);
     }
 #ifdef LIB_DEBUG
@@ -89,20 +112,28 @@ std::string NativeOSManager::GetIONetworkProperty(const std::string &property)
         const size_t MACAddressLength = 6;
         CFDataRef registryData = (CFDataRef)registryPropertyVoidCF;
         uint8_t MACAddrBuffer[MACAddressLength];
-        CFDataGetBytes(registryData, {.location = 0, .length = MACAddressLength}, MACAddrBuffer);
+        if (registryPropertyVoidCF
+                && CFGetTypeID(registryPropertyVoidCF) == CFDataGetTypeID()
+                && CFDataGetLength(registryData) >= static_cast<CFIndex>(MACAddressLength))
+        {
+            CFRange range = CFRangeMake(0, static_cast<CFIndex>(MACAddressLength));
+            CFDataGetBytes(registryData, range, MACAddrBuffer);
 
-        std::ostringstream ss;
-        for (size_t i = 0; i < MACAddressLength; i++) {
-            if (i != 0)
-                ss << ":";
-            ss.width(2);
-            ss.fill('0');
-            ss << std::hex << (int)(MACAddrBuffer[i]);
+            std::ostringstream ss;
+            for (size_t i = 0; i < MACAddressLength; i++) {
+                if (i != 0)
+                    ss << ":";
+                ss.width(2);
+                ss.fill('0');
+                ss << std::hex << (int)(MACAddrBuffer[i]);
+            }
+
+            result = ss.str();
         }
 
-        result = ss.str();
-
-        CFRelease(registryPropertyVoidCF);
+        if (registryPropertyVoidCF) {
+            CFRelease(registryPropertyVoidCF);
+        }
         IOObjectRelease(service);
     }
 #ifdef LIB_DEBUG
@@ -122,18 +153,16 @@ std::string NativeOSManager::GetIOStorageProperty(const std::string &property)
 
     if (service) {
         CFMutableDictionaryRef properties = nullptr;
-        IORegistryEntryCreateCFProperties(service, &properties, 0, 0);
-        CFRetain(properties); /* lock properties (Without blocking the collection,
-            there may be an error of unsynchronized access to the collection) */
-
-        CFDictionaryRef deviceProperties = (CFDictionaryRef)(CFDictionaryGetValue(properties, CFSTR("Device Characteristics")));
-        CFRetain( deviceProperties ); // lock deviceProperties
-
-        CFStringWrapper serialNumber((CFStringRef)(CFDictionaryGetValue(deviceProperties, propertyCF.cfStr)));
-        result = serialNumber.GetStdString();
-
-        CFRelease(deviceProperties);
-        CFRelease(properties);
+        if (IORegistryEntryCreateCFProperties(service, &properties, 0, 0) == KERN_SUCCESS && properties) {
+            CFDictionaryRef deviceProperties = (CFDictionaryRef)(CFDictionaryGetValue(properties, CFSTR("Device Characteristics")));
+            if (deviceProperties && CFGetTypeID(deviceProperties) == CFDictionaryGetTypeID()) {
+                CFTypeRef serialNumber = CFDictionaryGetValue(deviceProperties, propertyCF.cfStr);
+                if (serialNumber && CFGetTypeID(serialNumber) == CFStringGetTypeID()) {
+                    result = CFStringToStdString((CFStringRef)serialNumber);
+                }
+            }
+            CFRelease(properties);
+        }
         IOObjectRelease(service);
     }
 #ifdef LIB_DEBUG
