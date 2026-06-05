@@ -180,17 +180,13 @@ target_link_libraries(your_app PRIVATE libhid::libhid)
 Open the project as a CMake project by selecting `CMakeLists.txt`.
 Qt Creator will create its own local build directory, which is ignored by Git.
 
-The old `libhid.pro` file is kept temporarily for compatibility during migration
-from qmake to CMake.
-
 The recommended public include path is `libhid/libhid.h`. A compatibility
 wrapper is also kept at `libhid.h` for existing code.
 
 ## Migrating From qmake
 
-The project now uses CMake as the primary build system. Existing qmake users can
-temporarily continue using `libhid.pro`, but new integrations should prefer
-`CMakeLists.txt`.
+The project now uses CMake as its build system. The old `libhid.pro` qmake file
+has been removed.
 
 Recommended migration path:
 
