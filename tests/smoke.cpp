@@ -5,6 +5,15 @@
 int main()
 {
     const std::string hardwareId = LibHid::GetHardwareId();
-    (void)hardwareId;
+    const std::string appHardwareId = LibHid::GetHardwareId("libhid-smoke-test");
+
+    if (!hardwareId.empty() && appHardwareId.empty()) {
+        return 1;
+    }
+
+    if (!hardwareId.empty() && hardwareId == appHardwareId) {
+        return 1;
+    }
+
     return 0;
 }

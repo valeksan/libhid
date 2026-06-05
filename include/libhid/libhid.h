@@ -30,6 +30,7 @@ class LIBHID_EXPORT LibHid
 public:
     LibHid();
     [[nodiscard]] static std::string GetHardwareId();
+    [[nodiscard]] static std::string GetHardwareId(const std::string &applicationNamespace);
 };
 
 

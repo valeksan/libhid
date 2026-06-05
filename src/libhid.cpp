@@ -21,6 +21,11 @@ LibHid::LibHid()
 
 std::string LibHid::GetHardwareId()
 {
+    return GetHardwareId(std::string());
+}
+
+std::string LibHid::GetHardwareId(const std::string &applicationNamespace)
+{
     std::string hardwareIdResult = "";
     try {
         // Getting HID
@@ -30,6 +35,9 @@ std::string LibHid::GetHardwareId()
             std::cerr << "Couldn't get any of all hardware IDs! " << std::endl;
 #endif
             return hid;
+        }
+        if (!applicationNamespace.empty()) {
+            hid += ":" + applicationNamespace;
         }
         // Getting MD5 hash of data about hardware - there is our UUID
         MD5 md5(hid);

@@ -37,6 +37,7 @@ virtual machine changes, or restricted OS permissions.
 int main()
 {
     const std::string hardwareId = LibHid::GetHardwareId();
+    const std::string appHardwareId = LibHid::GetHardwareId("my-product");
 
     if (hardwareId.empty()) {
         std::cerr << "Hardware ID is not available\n";
@@ -44,6 +45,7 @@ int main()
     }
 
     std::cout << hardwareId << '\n';
+    std::cout << appHardwareId << '\n';
     return 0;
 }
 ```
@@ -58,6 +60,10 @@ The returned value is a UUID-like string, for example:
 expose the required hardware properties or if access to those properties is
 restricted. Callers should treat an empty value as "hardware ID unavailable" and
 decide on an application-specific fallback.
+
+Use `GetHardwareId("your-product-or-namespace")` when different applications
+should receive different stable IDs on the same machine. Passing an empty string
+keeps the same behavior as `GetHardwareId()`.
 
 ## Identifier Stability
 
@@ -80,6 +86,10 @@ UUID-like string. It is not used as a cryptographic security primitive.
 Do not rely on this ID as the only proof for licensing, authentication, or access
 control. For security-sensitive systems, combine it with server-side validation,
 signed license data, user accounts, or another trusted mechanism.
+
+An application namespace is not a secret and should not be treated as a password
+or cryptographic salt. It is only a practical way to separate IDs between
+products or internal tools.
 
 ## Build With CMake
 
