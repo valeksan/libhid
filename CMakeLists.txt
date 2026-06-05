@@ -36,6 +36,12 @@ target_compile_definitions(libhid
 )
 
 if(WIN32)
+    set_target_properties(libhid
+        PROPERTIES
+            PREFIX ""
+            IMPORT_PREFIX ""
+    )
+
     target_sources(libhid
         PRIVATE
             imp/windows_manager.cpp
