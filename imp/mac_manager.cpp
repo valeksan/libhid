@@ -1,7 +1,4 @@
 #include "mac_manager.hpp"
-#include "../log.hpp"
-#include "../util.hpp"
-#include "../version.hpp"
 
 // MAC-specific include
 #include <IOKit/IOKitLib.h>

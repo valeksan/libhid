@@ -1,8 +1,10 @@
 #include "util.hpp"
 
 #include <chrono>
-#include <locale>
-#include <codecvt>
+
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 
 namespace system_info {
 
@@ -46,9 +48,27 @@ std::string Util::HashToUUID(const std::string &hash)
 
 std::string Util::WstringToString(const std::wstring &ws)
 {
-    using convert_typeX = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_typeX, wchar_t> converterX;
-    return converterX.to_bytes(ws);
+    if (ws.empty()) {
+        return std::string();
+    }
+
+#if defined(_WIN32)
+    const int size = WideCharToMultiByte(CP_UTF8, 0, ws.data(), static_cast<int>(ws.size()), nullptr, 0, nullptr, nullptr);
+    if (size <= 0) {
+        return std::string();
+    }
+
+    std::string result(static_cast<std::size_t>(size), '\0');
+    WideCharToMultiByte(CP_UTF8, 0, ws.data(), static_cast<int>(ws.size()), &result[0], size, nullptr, nullptr);
+    return result;
+#else
+    std::string result;
+    result.reserve(ws.size());
+    for (const wchar_t ch : ws) {
+        result.push_back(ch <= 0x7f ? static_cast<char>(ch) : '?');
+    }
+    return result;
+#endif
 }
 
 void Util::SwapUUIDBlocks(std::string &uuid, const int begin, const int end)
