@@ -19,12 +19,12 @@ LibHid::LibHid()
 {
 }
 
-std::string LibHid::GetHardwareId()
+std::string libhid::GetHardwareId()
 {
     return GetHardwareId(std::string());
 }
 
-std::string LibHid::GetHardwareId(const std::string &applicationNamespace)
+std::string libhid::GetHardwareId(const std::string &applicationNamespace)
 {
     std::string hardwareIdResult = "";
     try {
@@ -50,4 +50,14 @@ std::string LibHid::GetHardwareId(const std::string &applicationNamespace)
 #endif
     }
     return hardwareIdResult;
+}
+
+std::string LibHid::GetHardwareId()
+{
+    return libhid::GetHardwareId();
+}
+
+std::string LibHid::GetHardwareId(const std::string &applicationNamespace)
+{
+    return libhid::GetHardwareId(applicationNamespace);
 }

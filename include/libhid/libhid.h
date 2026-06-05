@@ -25,6 +25,13 @@
 #  define SHAREDTESTLIB_EXPORT LIBHID_EXPORT
 #endif
 
+namespace libhid {
+
+[[nodiscard]] LIBHID_EXPORT std::string GetHardwareId();
+[[nodiscard]] LIBHID_EXPORT std::string GetHardwareId(const std::string &applicationNamespace);
+
+} // namespace libhid
+
 class LIBHID_EXPORT LibHid
 {
 public:

@@ -36,8 +36,8 @@ virtual machine changes, or restricted OS permissions.
 
 int main()
 {
-    const std::string hardwareId = LibHid::GetHardwareId();
-    const std::string appHardwareId = LibHid::GetHardwareId("my-product");
+    const std::string hardwareId = libhid::GetHardwareId();
+    const std::string appHardwareId = libhid::GetHardwareId("my-product");
 
     if (hardwareId.empty()) {
         std::cerr << "Hardware ID is not available\n";
@@ -56,14 +56,17 @@ The returned value is a UUID-like string, for example:
 01234567-89ab-cdef-0123-456789abcdef
 ```
 
-`GetHardwareId()` may return an empty string if the operating system does not
+`libhid::GetHardwareId()` may return an empty string if the operating system does not
 expose the required hardware properties or if access to those properties is
 restricted. Callers should treat an empty value as "hardware ID unavailable" and
 decide on an application-specific fallback.
 
-Use `GetHardwareId("your-product-or-namespace")` when different applications
+Use `libhid::GetHardwareId("your-product-or-namespace")` when different applications
 should receive different stable IDs on the same machine. Passing an empty string
-keeps the same behavior as `GetHardwareId()`.
+keeps the same behavior as `libhid::GetHardwareId()`.
+
+The older `LibHid::GetHardwareId()` class API remains available as a
+compatibility wrapper.
 
 ## Identifier Stability
 

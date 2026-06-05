@@ -5,8 +5,8 @@
 
 int main()
 {
-    const std::string hardwareId = LibHid::GetHardwareId();
-    const std::string appHardwareId = LibHid::GetHardwareId("example-app");
+    const std::string hardwareId = libhid::GetHardwareId();
+    const std::string appHardwareId = libhid::GetHardwareId("example-app");
 
     if (hardwareId.empty()) {
         std::cout << "Hardware ID is not available" << std::endl;
