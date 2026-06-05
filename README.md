@@ -89,8 +89,7 @@ from qmake to CMake.
 
 - Debug builds define `LIB_DEBUG` and may print diagnostic messages to standard
   output or standard error.
-- The library exports `LibHid` from a shared library using the existing
-  `SHAREDTESTLIB_EXPORT` macro.
+- The library exports `LibHid` from a shared library using the `LIBHID_EXPORT`
+  macro. The old `SHAREDTESTLIB_EXPORT` name is kept as a compatibility alias.
 - The hardware ID depends on values reported by the operating system and may be
   empty if required properties are unavailable.
-

@@ -63,3 +63,6 @@ install_manifest.txt
 CTestTestfile.cmake
 Testing/
 *.cmake.user
+
+# Local project notes
+/local_docs/

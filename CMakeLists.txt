@@ -31,7 +31,7 @@ target_include_directories(libhid
 
 target_compile_definitions(libhid
     PRIVATE
-        SHAREDTESTLIB_LIBRARY
+        LIBHID_LIBRARY
         $<$<CONFIG:Debug>:LIB_DEBUG>
 )
 
