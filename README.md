@@ -149,6 +149,12 @@ from qmake to CMake.
 The recommended public include path is `libhid/libhid.h`. A compatibility
 wrapper is also kept at `libhid.h` for existing code.
 
+## Continuous Integration
+
+GitHub Actions builds and tests the CMake project on Windows and Linux in Debug
+and Release configurations. The workflow also verifies the install step so the
+CMake package export remains usable by downstream projects.
+
 ## Notes For Developers
 
 - Debug builds define `LIB_DEBUG` and may print diagnostic messages to standard
