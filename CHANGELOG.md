@@ -37,6 +37,10 @@ and this project follows semantic versioning while it evolves toward a stable
   while hardware source collection evolves.
 - Initial Conan package recipe with a test package consumer.
 - Minor warning cleanup after validating Conan packaging locally.
+- Naming policy notes that keep the `libhid` repository/package name stable for
+  the `0.x` series.
+- API lifecycle notes that keep the compatibility `LibHid` class supported
+  through `0.x` while steering new code toward `libhid::GetHardwareId()`.
 
 ### Changed
 

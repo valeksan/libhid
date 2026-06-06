@@ -8,6 +8,15 @@ identifier for the current machine.
 Despite the name, `libhid` is not a USB HID library. In this project, HID means
 hardware identifier.
 
+Project naming policy:
+
+- The repository and package name remain `libhid` for the `0.x` series.
+- A rename to something like `libhwid` is not planned during `0.x`, because it
+  would create avoidable churn in package names, CMake targets, and include
+  paths while the API is still stabilizing.
+- If a rename is ever chosen for `1.x`, the transition should keep compatibility
+  aliases and clear migration notes for at least one documented release cycle.
+
 The library collects several OS-specific hardware properties, combines them,
 calculates an MD5 hash, and formats the result as a UUID-like string. This can be
 useful when an application developer needs a repeatable local machine identifier
@@ -125,8 +134,11 @@ Compatibility note:
   referenced the previous export macro name.
 - These compatibility names are not deprecated yet, so existing users do not get
   warning noise during the initial CMake migration period.
-- Before `1.0.0`, the project will either document them as long-term supported
-  aliases or mark them deprecated with a migration period.
+- The compatibility `LibHid` class remains supported throughout `0.x`. New code
+  should prefer `libhid::GetHardwareId()`.
+- Before `1.0.0`, the project should make an explicit decision whether
+  `LibHid`, the root `libhid.h`, and `SHAREDTESTLIB_EXPORT` become long-term
+  aliases or receive a documented deprecation period.
 
 ## Identifier Stability
 
