@@ -7,6 +7,7 @@ project(libhid
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 
 option(LIBHID_ENABLE_WARNINGS "Enable additional compiler warnings for libhid developers" ON)
 option(LIBHID_BUILD_EXAMPLES "Build libhid example applications" ON)
@@ -35,17 +36,19 @@ target_compile_features(libhid
 target_include_directories(libhid
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
-target_compile_definitions(libhid
-    PRIVATE
-        LIBHID_LIBRARY
-        $<$<CONFIG:Debug>:LIB_DEBUG>
+generate_export_header(libhid
+    BASE_NAME LIBHID
+    EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/libhid/libhid_export.h"
 )
+
+target_compile_definitions(libhid PRIVATE $<$<CONFIG:Debug>:LIB_DEBUG>)
 
 if(LIBHID_ENABLE_WARNINGS)
     if(MSVC)
@@ -135,6 +138,7 @@ if(LIBHID_INSTALL)
 
     install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/libhid/libhid_export.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
 
     install(EXPORT libhidTargets
         FILE libhidTargets.cmake
