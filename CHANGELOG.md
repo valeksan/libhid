@@ -20,6 +20,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Documentation for hardware property sources and known limitations.
 - Semantic versioning and breaking-change policy documentation.
 - Install-from-source and downstream CMake consumption documentation.
+- Release workflow for tagged builds with packaged artifacts and checksums.
 
 ### Changed
 

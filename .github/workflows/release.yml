@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: libhid-linux
+            archive_name: libhid-linux.tar.gz
+          - os: macos-latest
+            artifact_name: libhid-macos
+            archive_name: libhid-macos.tar.gz
+          - os: windows-latest
+            artifact_name: libhid-windows
+            archive_name: libhid-windows.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DLIBHID_BUILD_EXAMPLES=ON
+          -DLIBHID_BUILD_TESTS=ON
+          -DLIBHID_INSTALL=ON
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Test
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Install
+        run: cmake --install build --config Release --prefix package/${{ matrix.artifact_name }}
+
+      - name: Create Unix archive
+        if: runner.os != 'Windows'
+        run: tar -czf ${{ matrix.archive_name }} -C package ${{ matrix.artifact_name }}
+
+      - name: Create Windows archive
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path package/${{ matrix.artifact_name }} -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Generate Unix checksum
+        if: runner.os != 'Windows'
+        run: shasum -a 256 ${{ matrix.archive_name }} > ${{ matrix.archive_name }}.sha256
+
+      - name: Generate Windows checksum
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $hash = Get-FileHash -Algorithm SHA256 ${{ matrix.archive_name }}
+          "$($hash.Hash.ToLower())  ${{ matrix.archive_name }}" | Out-File -Encoding ascii ${{ matrix.archive_name }}.sha256
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ matrix.archive_name }}
+            ${{ matrix.archive_name }}.sha256
+

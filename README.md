@@ -274,6 +274,13 @@ GitHub Actions builds and tests the CMake project on Windows, Linux, and macOS i
 and Release configurations. The workflow also verifies the install step so the
 CMake package export remains usable by downstream projects.
 
+## Releases
+
+Version tags that start with `v`, for example `v0.1.0`, trigger the release
+workflow. It builds and tests the project on Windows, Linux, and macOS, installs
+the library into platform-specific packages, and uploads archives with SHA256
+checksums to the GitHub release.
+
 ## Versioning
 
 `libhid` follows semantic versioning while moving toward a stable `1.0.0`
