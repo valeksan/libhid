@@ -1,5 +1,4 @@
 #include "linux_manager.hpp"
-#include "imp/util.hpp"
 
 // Linux include specific
 #include <dirent.h>

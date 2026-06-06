@@ -1,6 +1,7 @@
 #include "util.hpp"
 
 #include <chrono>
+#include <ctime>
 
 #if defined(_WIN32)
 #include <windows.h>

@@ -10,7 +10,6 @@
 #include "imp/md5.hpp"
 #include "imp/util.hpp"
 
-#include <cstring>
 #include <iostream>
 
 using namespace system_info;

@@ -6,6 +6,7 @@
 
 // STD include
 #include <cstdint>
+#include <exception>
 #include <sstream>
 #include <iostream>
 #include <vector>

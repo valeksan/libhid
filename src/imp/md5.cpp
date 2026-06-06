@@ -1,5 +1,6 @@
 #include "md5.hpp"
 
+#include <cstdio>
 #include <cstring>
 
 namespace system_info {
