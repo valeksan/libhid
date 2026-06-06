@@ -193,6 +193,14 @@ Install rules are enabled by default. They can be disabled with:
 cmake -S . -B build -DLIBHID_INSTALL=OFF
 ```
 
+Install from source:
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+cmake --install build --config Release --prefix install
+```
+
 The built library is written to `../libs` relative to the project directory.
 
 On Windows with MinGW, the output files are named:
@@ -221,6 +229,12 @@ After installing `libhid`, consume it with:
 find_package(libhid CONFIG REQUIRED)
 
 target_link_libraries(your_app PRIVATE libhid::libhid)
+```
+
+If `libhid` was installed to a custom prefix, point CMake at it:
+
+```sh
+cmake -S your-app -B build -DCMAKE_PREFIX_PATH=/path/to/libhid/install
 ```
 
 When using the repository directly as a subproject:
