@@ -25,6 +25,7 @@ and this project follows semantic versioning while it evolves toward a stable
   `SHAREDTESTLIB_EXPORT` names.
 - CTest runtime environment setup for Windows MinGW builds.
 - Project `.clang-format` style configuration.
+- Unit tests for MD5 hashing and UUID formatting helpers.
 
 ### Changed
 

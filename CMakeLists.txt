@@ -179,6 +179,37 @@ endif()
 if(LIBHID_BUILD_TESTS)
     enable_testing()
 
+    function(libhid_configure_windows_test_runtime test_name runtime_target)
+        if(WIN32)
+            get_filename_component(libhid_compiler_runtime_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+            set_tests_properties(${test_name}
+                PROPERTIES
+                    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:${runtime_target}>;PATH=path_list_prepend:${libhid_compiler_runtime_dir}"
+            )
+        endif()
+    endfunction()
+
+    add_executable(libhid_pure_functions_test
+        tests/pure_functions.cpp
+        src/imp/md5.cpp
+        src/imp/util.cpp
+    )
+
+    target_include_directories(libhid_pure_functions_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+    set_target_properties(libhid_pure_functions_test
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
+    )
+
+    add_test(NAME libhid_pure_functions_test COMMAND libhid_pure_functions_test)
+
+    set_tests_properties(libhid_pure_functions_test
+        PROPERTIES
+            TIMEOUT 10
+    )
+    libhid_configure_windows_test_runtime(libhid_pure_functions_test libhid_pure_functions_test)
+
     add_executable(libhid_smoke_test tests/smoke.cpp)
 
     target_link_libraries(libhid_smoke_test PRIVATE libhid)
@@ -194,12 +225,5 @@ if(LIBHID_BUILD_TESTS)
         PROPERTIES
             TIMEOUT 30
     )
-
-    if(WIN32)
-        get_filename_component(libhid_compiler_runtime_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        set_tests_properties(libhid_smoke_test
-            PROPERTIES
-                ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:libhid>;PATH=path_list_prepend:${libhid_compiler_runtime_dir}"
-        )
-    endif()
+    libhid_configure_windows_test_runtime(libhid_smoke_test libhid)
 endif()
