@@ -29,6 +29,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Include cleanup with more explicit standard-library dependencies.
 - Optional static-library builds via `BUILD_SHARED_LIBS=OFF`.
 - Optional clang-format workflow for changed C/C++ files.
+- Project `.clang-tidy` configuration for gradual static analysis adoption.
 
 ### Changed
 

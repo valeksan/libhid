@@ -333,6 +333,9 @@ documented compatibility wrappers such as `LibHid`.
   compatibility alias for the `0.x` series.
 - The hardware ID depends on values reported by the operating system and may be
   empty if required properties are unavailable.
+- The repository includes `.clang-format` and `.clang-tidy` configs for gradual
+  code-quality adoption. A practical local `clang-tidy` run can use
+  `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` and `clang-tidy -p <build-dir>`.
 
 ## License
 
