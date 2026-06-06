@@ -24,6 +24,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Compatibility policy for older `LibHid`, root `libhid.h`, and
   `SHAREDTESTLIB_EXPORT` names.
 - CTest runtime environment setup for Windows MinGW builds.
+- Project `.clang-format` style configuration.
 
 ### Changed
 
