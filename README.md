@@ -269,3 +269,7 @@ CMake package export remains usable by downstream projects.
   compatibility alias.
 - The hardware ID depends on values reported by the operating system and may be
   empty if required properties are unavailable.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
