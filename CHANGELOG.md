@@ -30,6 +30,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Optional static-library builds via `BUILD_SHARED_LIBS=OFF`.
 - Optional clang-format workflow for changed C/C++ files.
 - Project `.clang-tidy` configuration for gradual static analysis adoption.
+- More robust Windows COM and WMI initialization/error handling.
 
 ### Changed
 

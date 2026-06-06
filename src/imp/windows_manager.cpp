@@ -7,6 +7,7 @@
 
 // Standart include
 #include <algorithm>
+#include <cwctype>
 #include <iostream>
 
 #ifdef __MINGW32__
@@ -15,20 +16,102 @@
 
 namespace system_info {
 
+namespace {
+
+struct ComInitGuard
+{
+    ComInitGuard()
+        : result(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED))
+    {
+    }
+
+    ~ComInitGuard()
+    {
+        if (SUCCEEDED(result)) {
+            CoUninitialize();
+        }
+    }
+
+    bool IsReady() const
+    {
+        return SUCCEEDED(result) || result == RPC_E_CHANGED_MODE;
+    }
+
+    HRESULT result;
+};
+
+bool EnsureComSecurity()
+{
+    const HRESULT result = CoInitializeSecurity(
+        nullptr,
+        -1,
+        nullptr,
+        nullptr,
+        RPC_C_AUTHN_LEVEL_DEFAULT,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        nullptr,
+        EOAC_NONE,
+        nullptr);
+
+    return SUCCEEDED(result) || result == RPC_E_TOO_LATE;
+}
+
+template <typename T>
+struct ComHolder
+{
+    ~ComHolder()
+    {
+        if (ptr) {
+            ptr->Release();
+        }
+    }
+
+    T *Get() const
+    {
+        return ptr;
+    }
+
+    T **Put()
+    {
+        return &ptr;
+    }
+
+    T *ptr = nullptr;
+};
+
 struct BSTRHolder
 {
-   BSTRHolder(const wchar_t *str)
-   {
-      bstr = SysAllocString(str);
-   }
-   ~BSTRHolder()
-   {
-      if (bstr) {
-         SysFreeString(bstr);
-      }
-   }
-   BSTR bstr;
+    explicit BSTRHolder(const wchar_t *str)
+    {
+        bstr = SysAllocString(str);
+    }
+
+    ~BSTRHolder()
+    {
+        if (bstr) {
+            SysFreeString(bstr);
+        }
+    }
+
+    BSTR bstr = nullptr;
 };
+
+struct VariantHolder
+{
+    VariantHolder()
+    {
+        VariantInit(&value);
+    }
+
+    ~VariantHolder()
+    {
+        VariantClear(&value);
+    }
+
+    VARIANT value;
+};
+
+} // namespace
 
 // In mingw CLSID_WbemLocator and IID_IWbemLocator give undefined reference, we use our "analog"
 const CLSID NativeOSManager::local_CLSID_WbemLocator = {0x4590F811, 0x1D3A, 0x11D0, {0x89, 0x1F, 0, 0xAA, 0, 0x4B, 0x2E, 0x24}};
@@ -36,76 +119,124 @@ const IID NativeOSManager::local_IID_IWbemLocator = {0xdc12a687, 0x737f, 0x11cf,
 
 std::string NativeOSManager::GetHardwareProperties()
 {
-   std::wstring hardwareId = L"";
+    ComInitGuard comInit;
+    if (!comInit.IsReady()) {
+#ifdef LIB_DEBUG
+        std::cerr << "COM initialization failed for Windows hardware detection." << std::endl;
+#endif
+        return std::string();
+    }
 
-   if (SUCCEEDED(CoInitialize(nullptr))) {
-      hardwareId = GetWmiProperties();
-      CoUninitialize();
-   }
+    if (!EnsureComSecurity()) {
+#ifdef LIB_DEBUG
+        std::cerr << "COM security initialization failed for Windows hardware detection." << std::endl;
+#endif
+        return std::string();
+    }
 
-   return Util::WstringToString(hardwareId);
+    return Util::WstringToString(GetWmiProperties());
 }
 
 std::wstring NativeOSManager::GetWmiProperties()
 {
-   std::wstring result;
-   //CoInitializeSecurity
+    std::wstring result;
 
-   IWbemLocator *locator;
-   if (SUCCEEDED(CoCreateInstance(local_CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, local_IID_IWbemLocator, reinterpret_cast<void**>(&locator)))) {
-      IWbemServices *services;
-      BSTRHolder net(L"ROOT\\CIMV2");
-      if (SUCCEEDED(locator->ConnectServer(net.bstr, nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &services))) {
-         if (SUCCEEDED(CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE))) {
-            try {
-               result += GetWmiProperty(services, L"Win32_ComputerSystemProduct", L"UUID");
-               result += GetWmiProperty(services, L"Win32_OperatingSystem", L"SerialNumber");
-               result += GetWmiPropertyForHdd(services, true);
-               result += GetWmiProperty(services, L"Win32_ComputerSystemProduct", L"IdentifyingNumber");
-               result += GetWmiProperty(services, L"Win32_BaseBoard", L"SerialNumber");
-               result += GetWmiPropertyForNetworkAdapter(services);
-            } catch(...) {
-               result.clear();
-            }
-         }
-         services->Release();
-      }
-      locator->Release();
-   }
-   return result;
+    ComHolder<IWbemLocator> locator;
+    const HRESULT locatorResult = CoCreateInstance(
+        local_CLSID_WbemLocator,
+        nullptr,
+        CLSCTX_INPROC_SERVER,
+        local_IID_IWbemLocator,
+        reinterpret_cast<void **>(locator.Put()));
+    if (FAILED(locatorResult)) {
+        return result;
+    }
+
+    ComHolder<IWbemServices> services;
+    BSTRHolder net(L"ROOT\\CIMV2");
+    const HRESULT connectResult = locator.Get()->ConnectServer(
+        net.bstr,
+        nullptr,
+        nullptr,
+        nullptr,
+        WBEM_FLAG_CONNECT_USE_MAX_WAIT,
+        nullptr,
+        nullptr,
+        services.Put());
+    if (FAILED(connectResult)) {
+        return result;
+    }
+
+    const HRESULT blanketResult = CoSetProxyBlanket(
+        services.Get(),
+        RPC_C_AUTHN_WINNT,
+        RPC_C_AUTHZ_NONE,
+        nullptr,
+        RPC_C_AUTHN_LEVEL_CALL,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        nullptr,
+        EOAC_NONE);
+    if (FAILED(blanketResult)) {
+        return result;
+    }
+
+    try {
+        result += GetWmiProperty(services.Get(), L"Win32_ComputerSystemProduct", L"UUID");
+        result += GetWmiProperty(services.Get(), L"Win32_OperatingSystem", L"SerialNumber");
+        result += GetWmiPropertyForHdd(services.Get(), true);
+        result += GetWmiProperty(services.Get(), L"Win32_ComputerSystemProduct", L"IdentifyingNumber");
+        result += GetWmiProperty(services.Get(), L"Win32_BaseBoard", L"SerialNumber");
+        result += GetWmiPropertyForNetworkAdapter(services.Get());
+    } catch (...) {
+        result.clear();
+    }
+
+    return result;
 }
 
 std::wstring NativeOSManager::GetWmiProperty(IWbemServices *services, const wchar_t *classname, const wchar_t *property, bool check)
 {
-   std::wstring result;
-   IEnumWbemClassObject *enumerator = nullptr;
-   try {
-      std::wstring query = L"SELECT * FROM ";
-      query += classname;
-      BSTRHolder query_holder(query.c_str());
-      BSTRHolder lang(L"WQL");
-      if (SUCCEEDED(services->ExecQuery(lang.bstr, query_holder.bstr, WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &enumerator))) {
-         IWbemClassObject* object;
-         ULONG returned = 0;
-         if (SUCCEEDED(enumerator->Next(WBEM_INFINITE, 1, &object, &returned)) && (returned > 0)) {
-            VARIANT value;
-            CIMTYPE type;
-            if (SUCCEEDED(object->Get(property, 0, &value, &type, nullptr))) {
-               if ((type == CIM_STRING) && (value.vt == VT_BSTR)) {
-                  result += ProcessWmiProperty(V_BSTR(&value), check);
-               }
-               VariantClear(&value);
-            }
-            object->Release();
-         }
-      }
-   } catch(...) {
-      result.clear();
-   }
-   if (enumerator) {
-      enumerator->Release();
-   }
-   return result;
+    std::wstring result;
+    ComHolder<IEnumWbemClassObject> enumerator;
+
+    try {
+        std::wstring query = L"SELECT * FROM ";
+        query += classname;
+        BSTRHolder query_holder(query.c_str());
+        BSTRHolder lang(L"WQL");
+
+        const HRESULT queryResult = services->ExecQuery(
+            lang.bstr,
+            query_holder.bstr,
+            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+            nullptr,
+            enumerator.Put());
+        if (FAILED(queryResult)) {
+            return result;
+        }
+
+        ComHolder<IWbemClassObject> object;
+        ULONG returned = 0;
+        const HRESULT nextResult = enumerator.Get()->Next(WBEM_INFINITE, 1, object.Put(), &returned);
+        if (FAILED(nextResult) || returned == 0) {
+            return result;
+        }
+
+        VariantHolder value;
+        CIMTYPE type = 0;
+        const HRESULT getResult = object.Get()->Get(property, 0, &value.value, &type, nullptr);
+        if (FAILED(getResult)) {
+            return result;
+        }
+
+        if (type == CIM_STRING && value.value.vt == VT_BSTR) {
+            result += ProcessWmiProperty(V_BSTR(&value.value), check);
+        }
+    } catch (...) {
+        result.clear();
+    }
+
+    return result;
 }
 
 std::wstring NativeOSManager::GetWmiPropertyForHdd(IWbemServices *services, bool check)
@@ -147,7 +278,8 @@ std::wstring NativeOSManager::GetWmiPropertyForNetworkAdapter(IWbemServices *ser
 
 void NativeOSManager::ToLower(std::wstring &string)
 {
-   std::transform(string.begin(), string.end(), string.begin(), tolower);
+    std::transform(string.begin(), string.end(), string.begin(),
+                   [](wchar_t ch) { return static_cast<wchar_t>(std::towlower(ch)); });
 }
 
 } // end namespace system_info
