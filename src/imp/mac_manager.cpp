@@ -13,7 +13,59 @@
 
 namespace system_info {
 
+namespace {
+
 std::string CFStringToStdString(CFStringRef cfStr);
+
+template <typename T>
+struct CFHolder {
+    explicit CFHolder(T value = nullptr)
+        : value(value)
+    {
+    }
+
+    ~CFHolder()
+    {
+        if (value) {
+            CFRelease(value);
+        }
+    }
+
+    T get() const
+    {
+        return value;
+    }
+
+    T release()
+    {
+        T current = value;
+        value = nullptr;
+        return current;
+    }
+
+    T value = nullptr;
+};
+
+struct IOObjectHolder {
+    explicit IOObjectHolder(io_object_t object = IO_OBJECT_NULL)
+        : object(object)
+    {
+    }
+
+    ~IOObjectHolder()
+    {
+        if (object) {
+            IOObjectRelease(object);
+        }
+    }
+
+    io_object_t get() const
+    {
+        return object;
+    }
+
+    io_object_t object = IO_OBJECT_NULL;
+};
 
 struct CFStringWrapper {
     explicit CFStringWrapper(CFStringRef cfStr)
@@ -61,6 +113,20 @@ std::string CFStringToStdString(CFStringRef cfStr)
     return "";
 }
 
+io_service_t FindMatchingService(const std::vector<const char *> &serviceNames)
+{
+    for (const char *serviceName : serviceNames) {
+        IOObjectHolder service(IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(serviceName)));
+        if (service.get()) {
+            return service.release();
+        }
+    }
+
+    return IO_OBJECT_NULL;
+}
+
+} // namespace
+
 std::string NativeOSManager::GetHardwareProperties()
 {
     std::string result = "";
@@ -104,17 +170,16 @@ std::string NativeOSManager::GetIONetworkProperty(const std::string &property)
     std::string result = "";
     CFStringWrapper propertyCF(property);
 
-    io_service_t service = IOServiceGetMatchingService(
-                kIOMasterPortDefault, IOServiceMatching("IOEthernetInterface"));
+    IOObjectHolder service(FindMatchingService({"IOEthernetInterface", "IO80211Interface"}));
 
-    if (service) {
-        CFTypeRef registryPropertyVoidCF = IORegistryEntryCreateCFProperty(service, propertyCF.cfStr, 0, 0);
+    if (service.get()) {
+        CFHolder<CFTypeRef> registryPropertyVoidCF(IORegistryEntryCreateCFProperty(service.get(), propertyCF.cfStr, 0, 0));
 
         const size_t MACAddressLength = 6;
-        CFDataRef registryData = (CFDataRef)registryPropertyVoidCF;
+        CFDataRef registryData = reinterpret_cast<CFDataRef>(registryPropertyVoidCF.get());
         uint8_t MACAddrBuffer[MACAddressLength];
-        if (registryPropertyVoidCF
-                && CFGetTypeID(registryPropertyVoidCF) == CFDataGetTypeID()
+        if (registryPropertyVoidCF.get()
+                && CFGetTypeID(registryPropertyVoidCF.get()) == CFDataGetTypeID()
                 && CFDataGetLength(registryData) >= static_cast<CFIndex>(MACAddressLength))
         {
             CFRange range = CFRangeMake(0, static_cast<CFIndex>(MACAddressLength));
@@ -131,14 +196,9 @@ std::string NativeOSManager::GetIONetworkProperty(const std::string &property)
 
             result = ss.str();
         }
-
-        if (registryPropertyVoidCF) {
-            CFRelease(registryPropertyVoidCF);
-        }
-        IOObjectRelease(service);
     }
 #ifdef LIB_DEBUG
-    std::cout << "Property \'" << property << "\' of service \'IOEthernetInterface\'"
+    std::cout << "Property \'" << property << "\' of service \'IOEthernetInterface/IO80211Interface\'"
               << " = \'" << result << "\' " << std::endl;
 #endif
     return result;
@@ -149,25 +209,28 @@ std::string NativeOSManager::GetIOStorageProperty(const std::string &property)
     std::string result = "";
     CFStringWrapper propertyCF(property);
 
-    io_service_t service = IOServiceGetMatchingService(
-                kIOMasterPortDefault, IOServiceMatching("IOAHCIBlockStorageDevice"));
+    IOObjectHolder service(FindMatchingService({
+        "IOAHCIBlockStorageDevice",
+        "IONVMeBlockStorageDevice",
+        "IOBlockStorageDevice"
+    }));
 
-    if (service) {
+    if (service.get()) {
         CFMutableDictionaryRef properties = nullptr;
-        if (IORegistryEntryCreateCFProperties(service, &properties, 0, 0) == KERN_SUCCESS && properties) {
-            CFDictionaryRef deviceProperties = (CFDictionaryRef)(CFDictionaryGetValue(properties, CFSTR("Device Characteristics")));
+        if (IORegistryEntryCreateCFProperties(service.get(), &properties, 0, 0) == KERN_SUCCESS && properties) {
+            CFHolder<CFMutableDictionaryRef> propertiesHolder(properties);
+            CFDictionaryRef deviceProperties = reinterpret_cast<CFDictionaryRef>(
+                CFDictionaryGetValue(propertiesHolder.get(), CFSTR("Device Characteristics")));
             if (deviceProperties && CFGetTypeID(deviceProperties) == CFDictionaryGetTypeID()) {
                 CFTypeRef serialNumber = CFDictionaryGetValue(deviceProperties, propertyCF.cfStr);
                 if (serialNumber && CFGetTypeID(serialNumber) == CFStringGetTypeID()) {
                     result = CFStringToStdString((CFStringRef)serialNumber);
                 }
             }
-            CFRelease(properties);
         }
-        IOObjectRelease(service);
     }
 #ifdef LIB_DEBUG
-    std::cout << "Property \'Serial Number\' of service \'IOAHCIBlockStorageDevice\'"
+    std::cout << "Property \'Serial Number\' of service \'IOAHCIBlockStorageDevice/IONVMeBlockStorageDevice/IOBlockStorageDevice\'"
               << " = \'" << result << "\' " << std::endl;
 #endif
     return result;

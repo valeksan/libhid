@@ -59,8 +59,9 @@ macOS sources:
 
 - `IOPlatformSerialNumber`
 - `IOPlatformUUID`
-- `IOMACAddress`
-- Storage device `Serial Number`
+- `IOMACAddress` from `IOEthernetInterface` or `IO80211Interface`
+- Storage device `Serial Number` from common block-storage service families such as
+  AHCI, NVMe, or generic block-storage devices
 
 Known limitations:
 
@@ -72,7 +73,7 @@ Known limitations:
   names where practical.
 - Storage identifiers can change after disk replacement, repartitioning, or OS
   reinstall.
-- macOS storage service names may vary across hardware generations.
+- macOS IOKit service names may vary across Intel and Apple Silicon hardware.
 
 ## Public API
 
