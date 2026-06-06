@@ -126,6 +126,23 @@ keeps the same behavior as `libhid::GetHardwareId()`.
 The older `LibHid::GetHardwareId()` class API remains available as a
 compatibility wrapper.
 
+There is also a small C API for bindings and non-C++ consumers:
+
+```c
+#include "libhid/libhid_c.h"
+
+char hardware_id[37];
+const libhid_status status = libhid_get_hardware_id(hardware_id, sizeof(hardware_id));
+
+if (status == LIBHID_STATUS_OK) {
+    /* hardware_id now contains a NUL-terminated UUID-like string */
+}
+```
+
+The C API uses caller-provided buffers to avoid cross-module allocation issues.
+Use `libhid_hardware_id_buffer_size()` to get the recommended minimum buffer
+size for the current public format.
+
 Compatibility note:
 
 - `LibHid` and the root `libhid.h` wrapper are kept for existing users during
@@ -315,6 +332,9 @@ Then link the exported CMake target:
 find_package(libhid CONFIG REQUIRED)
 target_link_libraries(your_app PRIVATE libhid::libhid)
 ```
+
+The same package exports both the C++ headers and the C header
+`libhid/libhid_c.h`.
 
 ## Build In Qt Creator
 

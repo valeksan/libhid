@@ -41,6 +41,8 @@ and this project follows semantic versioning while it evolves toward a stable
   the `0.x` series.
 - API lifecycle notes that keep the compatibility `LibHid` class supported
   through `0.x` while steering new code toward `libhid::GetHardwareId()`.
+- Small C API with caller-provided output buffers for easier bindings and
+  non-C++ consumers.
 
 ### Changed
 

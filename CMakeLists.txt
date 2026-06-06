@@ -28,7 +28,9 @@ target_sources(libhid
         src/imp/util.hpp
         src/libhid.cpp
         include/libhid/libhid.h
+        include/libhid/libhid_c.h
         libhid.h
+        libhid_c.h
 )
 
 target_compile_features(libhid
@@ -148,8 +150,9 @@ if(LIBHID_INSTALL)
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
 
-    install(FILES libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    install(FILES libhid.h libhid_c.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     install(FILES include/libhid/libhid.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
+    install(FILES include/libhid/libhid_c.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/libhid/libhid_export.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libhid")
 
     install(EXPORT libhidTargets
@@ -239,4 +242,21 @@ if(LIBHID_BUILD_TESTS)
             TIMEOUT 30
     )
     libhid_configure_windows_test_runtime(libhid_smoke_test libhid)
+
+    add_executable(libhid_c_api_smoke_test tests/c_api_smoke.cpp)
+
+    target_link_libraries(libhid_c_api_smoke_test PRIVATE libhid)
+
+    set_target_properties(libhid_c_api_smoke_test
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs"
+    )
+
+    add_test(NAME libhid_c_api_smoke_test COMMAND libhid_c_api_smoke_test)
+
+    set_tests_properties(libhid_c_api_smoke_test
+        PROPERTIES
+            TIMEOUT 30
+    )
+    libhid_configure_windows_test_runtime(libhid_c_api_smoke_test libhid)
 endif()

@@ -20,6 +20,7 @@ class LibhidConan(ConanFile):
         "LICENSE",
         "README.md",
         "libhid.h",
+        "libhid_c.h",
         "cmake/*",
         "include/*",
         "src/*",
