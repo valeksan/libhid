@@ -134,7 +134,7 @@ std::string NativeOSManager::GetHardwareProperties()
         return std::string();
     }
 
-    return Util::WstringToString(GetWmiProperties());
+    return GetHardwareProbeResult().combinedProperties;
 }
 
 std::wstring NativeOSManager::GetWmiProperties()
@@ -189,6 +189,84 @@ std::wstring NativeOSManager::GetWmiProperties()
         result += GetWmiPropertyForNetworkAdapter(services.Get());
     } catch (...) {
         result.clear();
+    }
+
+    return result;
+}
+
+HardwareProbeResult NativeOSManager::GetHardwareProbeResult()
+{
+    HardwareProbeResult result;
+
+    ComInitGuard comInit;
+    if (!comInit.IsReady()) {
+#ifdef LIB_DEBUG
+        std::cerr << "COM initialization failed for Windows hardware detection." << std::endl;
+#endif
+        return result;
+    }
+
+    if (!EnsureComSecurity()) {
+#ifdef LIB_DEBUG
+        std::cerr << "COM security initialization failed for Windows hardware detection." << std::endl;
+#endif
+        return result;
+    }
+
+    ComHolder<IWbemLocator> locator;
+    const HRESULT locatorResult = CoCreateInstance(
+        local_CLSID_WbemLocator,
+        nullptr,
+        CLSCTX_INPROC_SERVER,
+        local_IID_IWbemLocator,
+        reinterpret_cast<void **>(locator.Put()));
+    if (FAILED(locatorResult)) {
+        return result;
+    }
+
+    ComHolder<IWbemServices> services;
+    BSTRHolder net(L"ROOT\\CIMV2");
+    const HRESULT connectResult = locator.Get()->ConnectServer(
+        net.bstr,
+        nullptr,
+        nullptr,
+        nullptr,
+        WBEM_FLAG_CONNECT_USE_MAX_WAIT,
+        nullptr,
+        nullptr,
+        services.Put());
+    if (FAILED(connectResult)) {
+        return result;
+    }
+
+    const HRESULT blanketResult = CoSetProxyBlanket(
+        services.Get(),
+        RPC_C_AUTHN_WINNT,
+        RPC_C_AUTHZ_NONE,
+        nullptr,
+        RPC_C_AUTHN_LEVEL_CALL,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        nullptr,
+        EOAC_NONE);
+    if (FAILED(blanketResult)) {
+        return result;
+    }
+
+    try {
+        result.Add("windows.system_product_uuid",
+                   Util::WstringToString(GetWmiProperty(services.Get(), L"Win32_ComputerSystemProduct", L"UUID")));
+        result.Add("windows.os_serial_number",
+                   Util::WstringToString(GetWmiProperty(services.Get(), L"Win32_OperatingSystem", L"SerialNumber")));
+        result.Add("windows.system_drive_volume_serial",
+                   Util::WstringToString(GetWmiPropertyForHdd(services.Get(), true)));
+        result.Add("windows.identifying_number",
+                   Util::WstringToString(GetWmiProperty(services.Get(), L"Win32_ComputerSystemProduct", L"IdentifyingNumber")));
+        result.Add("windows.baseboard_serial_number",
+                   Util::WstringToString(GetWmiProperty(services.Get(), L"Win32_BaseBoard", L"SerialNumber")));
+        result.Add("windows.network_adapter_mac",
+                   Util::WstringToString(GetWmiPropertyForNetworkAdapter(services.Get())));
+    } catch (...) {
+        result = HardwareProbeResult();
     }
 
     return result;

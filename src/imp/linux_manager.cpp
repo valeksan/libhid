@@ -70,13 +70,18 @@ bool IsUsableMacAddress(const std::string &address)
 
 std::string NativeOSManager::GetHardwareProperties()
 {
-    std::string result = "";
+    return GetHardwareProbeResult().combinedProperties;
+}
 
-    result += GetDmiProperty("product", "uuid");
-    result += GetDmiProperty("product", "serial");
-    result += GetDmiProperty("board", "serial");
-    result += GetHDDSerialNumber();
-    result += GetMACAddress();
+HardwareProbeResult NativeOSManager::GetHardwareProbeResult()
+{
+    HardwareProbeResult result;
+
+    result.Add("linux.product_uuid", GetDmiProperty("product", "uuid"));
+    result.Add("linux.product_serial", GetDmiProperty("product", "serial"));
+    result.Add("linux.board_serial", GetDmiProperty("board", "serial"));
+    result.Add("linux.disk_uuid", GetHDDSerialNumber());
+    result.Add("linux.mac_address", GetMACAddress());
 
     return result;
 }

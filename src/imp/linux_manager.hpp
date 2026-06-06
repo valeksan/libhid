@@ -1,5 +1,7 @@
 #pragma once
 
+#include "hardware_probe.hpp"
+
 #include <string>
 #include <vector>
 
@@ -16,6 +18,7 @@ class NativeOSManager {
      * @return A string with hardware IDs following each other
      */
     static std::string GetHardwareProperties();
+    static HardwareProbeResult GetHardwareProbeResult();
 
  private:
     /**

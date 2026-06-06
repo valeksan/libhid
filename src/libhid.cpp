@@ -14,6 +14,21 @@
 
 using namespace system_info;
 
+namespace {
+
+#ifdef LIB_DEBUG
+void LogHardwareProbeDiagnostics(const HardwareProbeResult &probeResult)
+{
+    std::cerr << "Hardware source diagnostics:" << std::endl;
+    for (const HardwareProbeItem &item : probeResult.items) {
+        std::cerr << "  - " << item.source << ": "
+                  << (item.available ? "found" : "missing") << std::endl;
+    }
+}
+#endif
+
+} // namespace
+
 LibHid::LibHid()
 {
 }
@@ -28,10 +43,12 @@ std::string libhid::GetHardwareId(const std::string &applicationNamespace)
     std::string hardwareIdResult = "";
     try {
         // Getting HID
-        std::string hid = NativeOSManager::GetHardwareProperties();
+        const HardwareProbeResult probeResult = NativeOSManager::GetHardwareProbeResult();
+        std::string hid = probeResult.combinedProperties;
         if (hid.empty()) {
 #ifdef LIB_DEBUG
             std::cerr << "Couldn't get any of all hardware IDs! " << std::endl;
+            LogHardwareProbeDiagnostics(probeResult);
 #endif
             return hid;
         }

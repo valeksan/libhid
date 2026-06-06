@@ -1,5 +1,7 @@
 #pragma once
 
+#include "hardware_probe.hpp"
+
 #include <string>
 
 struct IWbemServices;
@@ -21,6 +23,7 @@ class NativeOSManager {
      * @return String with hardware identifiers following one after another
      */
     static std::string GetHardwareProperties();
+    static HardwareProbeResult GetHardwareProbeResult();
 
  private:
     /**

@@ -32,6 +32,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Project `.clang-tidy` configuration for gradual static analysis adoption.
 - More robust Windows COM and WMI initialization/error handling.
 - Broader macOS IOKit fallback service matching for storage and network lookups.
+- Internal diagnostics summary for hardware probe sources without exposing raw values.
 
 ### Changed
 

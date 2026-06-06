@@ -136,12 +136,17 @@ io_service_t FindMatchingService(const std::vector<const char *> &serviceNames)
 
 std::string NativeOSManager::GetHardwareProperties()
 {
-    std::string result = "";
+    return GetHardwareProbeResult().combinedProperties;
+}
 
-    result += GetIOPlatformProperty( "IOPlatformSerialNumber" );
-    result += GetIOPlatformProperty( "IOPlatformUUID" );
-    result += GetIONetworkProperty( "IOMACAddress" );
-    result += GetIOStorageProperty( "Serial Number" );
+HardwareProbeResult NativeOSManager::GetHardwareProbeResult()
+{
+    HardwareProbeResult result;
+
+    result.Add("mac.platform_serial_number", GetIOPlatformProperty("IOPlatformSerialNumber"));
+    result.Add("mac.platform_uuid", GetIOPlatformProperty("IOPlatformUUID"));
+    result.Add("mac.mac_address", GetIONetworkProperty("IOMACAddress"));
+    result.Add("mac.storage_serial_number", GetIOStorageProperty("Serial Number"));
 
     return result;
 }

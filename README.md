@@ -329,6 +329,8 @@ documented compatibility wrappers such as `LibHid`.
 
 - Debug builds define `LIB_DEBUG` and may print diagnostic messages to standard
   output or standard error.
+- Debug builds now report which hardware probe sources were found or missing,
+  without printing raw hardware values by default.
 - The library exports its public API from a shared library using the generated
   `LIBHID_EXPORT` macro. The old `SHAREDTESTLIB_EXPORT` name is kept as a
   compatibility alias for the `0.x` series.
