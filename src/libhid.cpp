@@ -7,8 +7,7 @@
 #elif defined(OS_MAC)
 #include "imp/mac_manager.hpp"
 #endif
-#include "imp/md5.hpp"
-#include "imp/util.hpp"
+#include "imp/hardware_id_builder.hpp"
 
 #include <iostream>
 
@@ -52,14 +51,7 @@ std::string libhid::GetHardwareId(const std::string &applicationNamespace)
 #endif
             return hid;
         }
-        if (!applicationNamespace.empty()) {
-            hid += ":" + applicationNamespace;
-        }
-        // Getting MD5 hash of data about hardware - there is our UUID
-        MD5 md5(hid);
-        std::string md5hash = md5.HexDigest();
-        std::string uuid = Util::HashToUUID(md5hash);
-        hardwareIdResult = uuid;
+        hardwareIdResult = BuildHardwareIdFromProperties(hid, applicationNamespace);
     } catch (...) {
 #ifdef LIB_DEBUG
         std::cerr << "Unpredictable error in GetHardwareId! " << std::endl;

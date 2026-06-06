@@ -1,4 +1,5 @@
 #include "imp/md5.hpp"
+#include "imp/hardware_id_builder.hpp"
 #include "imp/util.hpp"
 
 #include <string>
@@ -15,6 +16,7 @@ bool ExpectEqual(const std::string &actual, const std::string &expected)
 int main()
 {
     using system_info::MD5;
+    using system_info::BuildHardwareIdFromProperties;
     using system_info::Util;
 
     if (!ExpectEqual(MD5("").HexDigest(), "d41d8cd98f00b204e9800998ecf8427e")) {
@@ -35,6 +37,27 @@ int main()
     }
 
     if (!ExpectEqual(Util::WstringToString(L"libhid"), "libhid")) {
+        return 1;
+    }
+
+    if (!ExpectEqual(BuildHardwareIdFromProperties("", ""), "")) {
+        return 1;
+    }
+
+    const std::string hardwareId = BuildHardwareIdFromProperties("machine-properties", "");
+    const std::string hardwareIdAgain = BuildHardwareIdFromProperties("machine-properties", "");
+    const std::string namespacedHardwareId = BuildHardwareIdFromProperties("machine-properties", "my-app");
+
+    if (!ExpectEqual(hardwareId, hardwareIdAgain)) {
+        return 1;
+    }
+
+    if (hardwareId == namespacedHardwareId) {
+        return 1;
+    }
+
+    if (hardwareId.size() != 36 || hardwareId[8] != '-' || hardwareId[13] != '-'
+            || hardwareId[18] != '-' || hardwareId[23] != '-') {
         return 1;
     }
 

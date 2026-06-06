@@ -20,6 +20,8 @@ add_library(libhid::libhid ALIAS libhid)
 
 target_sources(libhid
     PRIVATE
+        src/imp/hardware_id_builder.cpp
+        src/imp/hardware_id_builder.hpp
         src/imp/md5.cpp
         src/imp/md5.hpp
         src/imp/util.cpp
@@ -201,6 +203,7 @@ if(LIBHID_BUILD_TESTS)
 
     add_executable(libhid_pure_functions_test
         tests/pure_functions.cpp
+        src/imp/hardware_id_builder.cpp
         src/imp/md5.cpp
         src/imp/util.cpp
     )
