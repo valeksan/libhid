@@ -57,6 +57,7 @@ compile_commands.json
 /build/
 /build-*/
 /cmake-build-*/
+/test_package/build/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
@@ -64,6 +65,7 @@ install_manifest.txt
 CTestTestfile.cmake
 Testing/
 *.cmake.user
+CMakeUserPresets.json
 
 # Local project notes
 /local_docs/
