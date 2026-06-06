@@ -1,5 +1,7 @@
 # libhid
 
+[![CI](https://github.com/valeksan/libhid/actions/workflows/ci.yml/badge.svg)](https://github.com/valeksan/libhid/actions/workflows/ci.yml)
+
 `libhid` is a small C++ shared library for generating a stable hardware-based
 identifier for the current machine.
 
@@ -150,6 +152,15 @@ Configure and build:
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
+```
+
+Or use CMake presets if your CMake version supports them. Presets use the
+`Ninja` generator, so make sure `ninja` is available in `PATH`.
+
+```sh
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
 ```
 
 Run tests:
