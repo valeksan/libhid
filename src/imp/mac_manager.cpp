@@ -64,6 +64,13 @@ struct IOObjectHolder {
         return object;
     }
 
+    io_object_t release()
+    {
+        io_object_t current = object;
+        object = IO_OBJECT_NULL;
+        return current;
+    }
+
     io_object_t object = IO_OBJECT_NULL;
 };
 
@@ -116,7 +123,7 @@ std::string CFStringToStdString(CFStringRef cfStr)
 io_service_t FindMatchingService(const std::vector<const char *> &serviceNames)
 {
     for (const char *serviceName : serviceNames) {
-        IOObjectHolder service(IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(serviceName)));
+        IOObjectHolder service(IOServiceGetMatchingService(0, IOServiceMatching(serviceName)));
         if (service.get()) {
             return service.release();
         }

@@ -281,8 +281,9 @@ std::string MD5::HexDigest() const
         return "";
 
     char buf[33];
-    for (int i = 0; i < 16; i++)
-        sprintf(buf + i * 2, "%02x", digest[i]);
+    for (int i = 0; i < 16; i++) {
+        std::snprintf(buf + i * 2, 3, "%02x", digest[i]);
+    }
 
     buf[32] = 0;
 
