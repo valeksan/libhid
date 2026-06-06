@@ -18,6 +18,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - CTest smoke test.
 - GitHub Actions CI for Windows, Linux, and macOS.
 - Documentation for hardware property sources and known limitations.
+- Semantic versioning and breaking-change policy documentation.
 
 ### Changed
 

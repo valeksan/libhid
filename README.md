@@ -260,6 +260,19 @@ GitHub Actions builds and tests the CMake project on Windows, Linux, and macOS i
 and Release configurations. The workflow also verifies the install step so the
 CMake package export remains usable by downstream projects.
 
+## Versioning
+
+`libhid` follows semantic versioning while moving toward a stable `1.0.0`
+release.
+
+Before `1.0.0`, minor versions may still include API adjustments, but the project
+tries to keep source compatibility whenever practical. After `1.0.0`, breaking
+API or ABI changes should require a major version bump.
+
+Breaking changes include removing public functions, changing public signatures,
+changing installed CMake target names, changing public header paths, or removing
+documented compatibility wrappers such as `LibHid`.
+
 ## Notes For Developers
 
 - Debug builds define `LIB_DEBUG` and may print diagnostic messages to standard
