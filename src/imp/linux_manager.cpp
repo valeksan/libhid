@@ -12,6 +12,63 @@
 
 namespace system_info {
 
+namespace {
+
+bool StartsWith(const std::string &value, const std::string &prefix)
+{
+    return value.compare(0, prefix.size(), prefix) == 0;
+}
+
+std::string GetBaseName(const std::string &path)
+{
+    const std::string::size_type separator = path.find_last_of('/');
+    if (separator == std::string::npos) {
+        return path;
+    }
+    return path.substr(separator + 1);
+}
+
+bool IsLikelyDiskDevicePath(const std::string &path)
+{
+    const std::string deviceName = GetBaseName(path);
+
+    return StartsWith(deviceName, "sd")
+        || StartsWith(deviceName, "hd")
+        || StartsWith(deviceName, "vd")
+        || StartsWith(deviceName, "xvd")
+        || StartsWith(deviceName, "nvme");
+}
+
+bool IsLikelyPhysicalNetworkInterface(const std::string &interfaceName)
+{
+    if (interfaceName == "lo"
+            || StartsWith(interfaceName, "docker")
+            || StartsWith(interfaceName, "br-")
+            || StartsWith(interfaceName, "virbr")
+            || StartsWith(interfaceName, "veth")
+            || StartsWith(interfaceName, "vmnet")
+            || StartsWith(interfaceName, "vboxnet")
+            || StartsWith(interfaceName, "tun")
+            || StartsWith(interfaceName, "tap")
+            || StartsWith(interfaceName, "wg")) {
+        return false;
+    }
+
+    return StartsWith(interfaceName, "eth")
+        || StartsWith(interfaceName, "en")
+        || StartsWith(interfaceName, "wl")
+        || StartsWith(interfaceName, "ww");
+}
+
+bool IsUsableMacAddress(const std::string &address)
+{
+    return !address.empty()
+        && address != "00:00:00:00:00:00"
+        && address != "ff:ff:ff:ff:ff:ff";
+}
+
+} // namespace
+
 std::string NativeOSManager::GetHardwareProperties()
 {
     std::string result = "";
@@ -68,11 +125,9 @@ std::string NativeOSManager::GetHDDSerialNumber()
         std::free(resolvedPath);
     }
 
-    // Find the earliest sda or hda name and return its UUID
+    // Find the earliest known block-device name and return its UUID.
     for (const auto &item : devices) {
-        if (item.first.find("sda") != std::string::npos ||
-                item.first.find("hda") != std::string::npos)
-        {
+        if (IsLikelyDiskDevicePath(item.first)) {
 #ifdef LIB_DEBUG
             std::cout << "Hard disk serial number: " << item.second << " " << std::endl;
 #endif
@@ -113,11 +168,9 @@ std::string NativeOSManager::GetMACAddress()
         netDevices[netName] = tempAddress;
     }
 
-    // Find the earliest eth or enp name and return its network address
+    // Find the earliest likely physical network interface and return its address.
     for (const auto &item : netDevices) {
-        if (item.first.find("eth") != std::string::npos
-                || item.first.find("enp") != std::string::npos)
-        {
+        if (IsLikelyPhysicalNetworkInterface(item.first) && IsUsableMacAddress(item.second)) {
 #ifdef LIB_DEBUG
             std::cout << "MAC-Address: " << item.second << " " << std::endl;
 #endif

@@ -50,8 +50,10 @@ Linux sources:
 - `/sys/class/dmi/id/product_uuid`
 - `/sys/class/dmi/id/product_serial`
 - `/sys/class/dmi/id/board_serial`
-- First matching `sda` or `hda` UUID from `/dev/disk/by-uuid/`
-- First matching `eth*` or `enp*` MAC address from `/sys/class/net/`
+- First matching disk UUID from `/dev/disk/by-uuid/` for common device names:
+  `sd*`, `hd*`, `vd*`, `xvd*`, or `nvme*`
+- First usable MAC address from likely physical `eth*`, `en*`, `wl*`, or `ww*`
+  network interfaces
 
 macOS sources:
 
@@ -65,7 +67,9 @@ Known limitations:
 - Virtual machines, containers, and CI runners may expose incomplete or synthetic
   hardware values.
 - Linux DMI files may require elevated permissions or may be unavailable.
-- Network interface naming can vary, especially on Linux.
+- Linux network interface naming can vary. The library skips common virtual or
+  service interfaces such as loopback, Docker bridges, veth, tun/tap, and similar
+  names where practical.
 - Storage identifiers can change after disk replacement, repartitioning, or OS
   reinstall.
 - macOS storage service names may vary across hardware generations.
@@ -111,6 +115,17 @@ keeps the same behavior as `libhid::GetHardwareId()`.
 
 The older `LibHid::GetHardwareId()` class API remains available as a
 compatibility wrapper.
+
+Compatibility note:
+
+- `LibHid` and the root `libhid.h` wrapper are kept for existing users during
+  the `0.x` series.
+- `SHAREDTESTLIB_EXPORT` remains as a compatibility alias for older code that
+  referenced the previous export macro name.
+- These compatibility names are not deprecated yet, so existing users do not get
+  warning noise during the initial CMake migration period.
+- Before `1.0.0`, the project will either document them as long-term supported
+  aliases or mark them deprecated with a migration period.
 
 ## Identifier Stability
 
@@ -300,7 +315,7 @@ documented compatibility wrappers such as `LibHid`.
   output or standard error.
 - The library exports its public API from a shared library using the generated
   `LIBHID_EXPORT` macro. The old `SHAREDTESTLIB_EXPORT` name is kept as a
-  compatibility alias.
+  compatibility alias for the `0.x` series.
 - The hardware ID depends on values reported by the operating system and may be
   empty if required properties are unavailable.
 

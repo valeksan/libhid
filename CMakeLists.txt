@@ -189,4 +189,17 @@ if(LIBHID_BUILD_TESTS)
     )
 
     add_test(NAME libhid_smoke_test COMMAND libhid_smoke_test)
+
+    set_tests_properties(libhid_smoke_test
+        PROPERTIES
+            TIMEOUT 30
+    )
+
+    if(WIN32)
+        get_filename_component(libhid_compiler_runtime_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        set_tests_properties(libhid_smoke_test
+            PROPERTIES
+                ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:libhid>;PATH=path_list_prepend:${libhid_compiler_runtime_dir}"
+        )
+    endif()
 endif()
