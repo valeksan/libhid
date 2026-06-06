@@ -27,6 +27,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Project `.clang-format` style configuration.
 - Unit tests for MD5 hashing and UUID formatting helpers.
 - Include cleanup with more explicit standard-library dependencies.
+- Optional static-library builds via `BUILD_SHARED_LIBS=OFF`.
 
 ### Changed
 

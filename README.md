@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/valeksan/libhid/actions/workflows/ci.yml/badge.svg)](https://github.com/valeksan/libhid/actions/workflows/ci.yml)
 
-`libhid` is a small C++ shared library for generating a stable hardware-based
+`libhid` is a small C++ library for generating a stable hardware-based
 identifier for the current machine.
 
 Despite the name, `libhid` is not a USB HID library. In this project, HID means
@@ -169,6 +169,13 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
+Build a static library instead of the default shared library:
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+cmake --build build --config Release
+```
+
 Or use CMake presets if your CMake version supports them. Presets use the
 `Ninja` generator, so make sure `ninja` is available in `PATH`.
 
@@ -176,6 +183,14 @@ Or use CMake presets if your CMake version supports them. Presets use the
 cmake --preset release
 cmake --build --preset release
 ctest --preset release
+```
+
+There is also a `static-release` preset for a static-library build:
+
+```sh
+cmake --preset static-release
+cmake --build --preset static-release
+ctest --preset static-release
 ```
 
 Run tests:

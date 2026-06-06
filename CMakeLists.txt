@@ -13,8 +13,9 @@ option(LIBHID_ENABLE_WARNINGS "Enable additional compiler warnings for libhid de
 option(LIBHID_BUILD_EXAMPLES "Build libhid example applications" ON)
 option(LIBHID_BUILD_TESTS "Build libhid tests" ON)
 option(LIBHID_INSTALL "Generate libhid install rules" ON)
+option(BUILD_SHARED_LIBS "Build libhid as a shared library" ON)
 
-add_library(libhid SHARED)
+add_library(libhid)
 add_library(libhid::libhid ALIAS libhid)
 
 target_sources(libhid
@@ -50,12 +51,21 @@ generate_export_header(libhid
 
 target_compile_definitions(libhid PRIVATE $<$<CONFIG:Debug>:LIB_DEBUG>)
 
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(libhid PUBLIC LIBHID_STATIC_DEFINE)
+endif()
+
 if(LIBHID_ENABLE_WARNINGS)
     if(MSVC)
         target_compile_options(libhid PRIVATE /W4)
     else()
         target_compile_options(libhid PRIVATE -Wall -Wextra -Wpedantic)
     endif()
+endif()
+
+set(libhid_platform_link_scope PRIVATE)
+if(NOT BUILD_SHARED_LIBS)
+    set(libhid_platform_link_scope PUBLIC)
 endif()
 
 if(WIN32)
@@ -79,7 +89,7 @@ if(WIN32)
     )
 
     target_link_libraries(libhid
-        PRIVATE
+        ${libhid_platform_link_scope}
             ole32
             oleaut32
             shell32
@@ -101,7 +111,7 @@ elseif(APPLE)
     target_compile_definitions(libhid PRIVATE OS_MAC)
 
     target_link_libraries(libhid
-        PRIVATE
+        ${libhid_platform_link_scope}
             "${COREFOUNDATION_LIBRARY}"
             "${IOKIT_LIBRARY}"
     )
