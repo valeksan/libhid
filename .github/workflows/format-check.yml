@@ -1,0 +1,71 @@
+name: Format Check
+
+on:
+  pull_request:
+    paths:
+      - ".clang-format"
+      - ".github/workflows/format-check.yml"
+      - "examples/**"
+      - "include/**"
+      - "libhid.h"
+      - "src/**"
+      - "tests/**"
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: "Base ref to compare against"
+        required: false
+        default: "main"
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Collect changed C/C++ files
+        id: changed-files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_ref="origin/${{ github.base_ref }}"
+            git fetch --no-tags --prune --depth=1 origin "${{ github.base_ref }}"
+          else
+            base_ref="origin/${{ github.event.inputs.base_ref || 'main' }}"
+            git fetch --no-tags --prune --depth=1 origin "${{ github.event.inputs.base_ref || 'main' }}"
+          fi
+
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD" -- \
+              '*.c' '*.cc' '*.cpp' '*.h' '*.hpp'
+          )
+
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "${files[@]}" > changed-files.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+
+      - name: Show changed files
+        if: steps.changed-files.outputs.has_files == 'true'
+        run: cat changed-files.txt
+
+      - name: Check formatting
+        if: steps.changed-files.outputs.has_files == 'true'
+        shell: bash
+        run: xargs -a changed-files.txt clang-format --dry-run --Werror
+
+      - name: No relevant changes
+        if: steps.changed-files.outputs.has_files != 'true'
+        run: echo "No C/C++ file changes to format-check."

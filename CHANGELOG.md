@@ -28,6 +28,7 @@ and this project follows semantic versioning while it evolves toward a stable
 - Unit tests for MD5 hashing and UUID formatting helpers.
 - Include cleanup with more explicit standard-library dependencies.
 - Optional static-library builds via `BUILD_SHARED_LIBS=OFF`.
+- Optional clang-format workflow for changed C/C++ files.
 
 ### Changed
 
