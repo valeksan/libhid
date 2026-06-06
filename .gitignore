@@ -67,3 +67,6 @@ Testing/
 
 # Local project notes
 /local_docs/
+
+# Python packaging cache
+__pycache__/

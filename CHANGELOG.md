@@ -35,6 +35,8 @@ and this project follows semantic versioning while it evolves toward a stable
 - Internal diagnostics summary for hardware probe sources without exposing raw values.
 - Dedicated internal helper and tests to keep final hardware ID generation stable
   while hardware source collection evolves.
+- Initial Conan package recipe with a test package consumer.
+- Minor warning cleanup after validating Conan packaging locally.
 
 ### Changed
 

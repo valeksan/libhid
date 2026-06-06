@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\projects\libhid\test_package\build\msvc-195-x86_64-14-release\CMakeFiles\8dfd2324e0b48e6290054f75b81d85c1\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{1C6BA3B7-C103-3B13-B0C0-22A4C8B9E071}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

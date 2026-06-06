@@ -18,11 +18,16 @@ std::string Util::GetTime()
 
     tp -= std::chrono::duration_cast<std::chrono::seconds>(tp);
     const time_t tt = std::chrono::system_clock::to_time_t(now);
-    const tm* currentTime = localtime(&tt);
+    tm currentTime = {};
+#if defined(_WIN32)
+    localtime_s(&currentTime, &tt);
+#else
+    localtime_r(&tt, &currentTime);
+#endif
 
-    timeStr += std::to_string(currentTime->tm_hour) + ":";
-    timeStr += std::to_string(currentTime->tm_min) + ":";
-    timeStr += std::to_string(currentTime->tm_sec) + ":";
+    timeStr += std::to_string(currentTime.tm_hour) + ":";
+    timeStr += std::to_string(currentTime.tm_min) + ":";
+    timeStr += std::to_string(currentTime.tm_sec) + ":";
     timeStr += std::to_string(tp/std::chrono::milliseconds(1));
 
     timeStr += "]";

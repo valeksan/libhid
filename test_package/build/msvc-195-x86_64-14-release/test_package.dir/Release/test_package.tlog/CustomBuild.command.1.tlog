@@ -1,0 +1,10 @@
+^E:\PROJECTS\LIBHID\TEST_PACKAGE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/projects/libhid/test_package -BE:/projects/libhid/test_package/build/msvc-195-x86_64-14-release --check-stamp-file E:/projects/libhid/test_package/build/msvc-195-x86_64-14-release/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

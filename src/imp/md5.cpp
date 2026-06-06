@@ -2,6 +2,8 @@
 
 #include <cstdio>
 #include <cstring>
+#include <limits>
+#include <stdexcept>
 
 namespace system_info {
 
@@ -80,7 +82,10 @@ MD5::MD5()
 MD5::MD5(const std::string &text)
 {
     Init();
-    Update(text.data(), text.size());
+    if (text.size() > std::numeric_limits<std::uint32_t>::max()) {
+        throw std::length_error("MD5 input is too large");
+    }
+    Update(text.data(), static_cast<std::uint32_t>(text.size()));
     Finalize();
 }
 

@@ -276,6 +276,34 @@ add_subdirectory(path/to/libhid)
 target_link_libraries(your_app PRIVATE libhid::libhid)
 ```
 
+## Use With Conan
+
+The repository includes a Conan 2 recipe and a `test_package` consumer.
+
+Create a local package:
+
+```sh
+conan create . --build=missing
+```
+
+Consume it from another project with:
+
+```ini
+[requires]
+libhid/0.1.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+Then link the exported CMake target:
+
+```cmake
+find_package(libhid CONFIG REQUIRED)
+target_link_libraries(your_app PRIVATE libhid::libhid)
+```
+
 ## Build In Qt Creator
 
 Open the project as a CMake project by selecting `CMakeLists.txt`.
