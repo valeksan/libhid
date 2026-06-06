@@ -3,6 +3,9 @@
 `libhid` is a small C++ shared library for generating a stable hardware-based
 identifier for the current machine.
 
+Despite the name, `libhid` is not a USB HID library. In this project, HID means
+hardware identifier.
+
 The library collects several OS-specific hardware properties, combines them,
 calculates an MD5 hash, and formats the result as a UUID-like string. This can be
 useful when an application developer needs a repeatable local machine identifier
@@ -25,6 +28,45 @@ virtual machine changes, or restricted OS permissions.
 - Windows: uses WMI and system APIs.
 - Linux: reads DMI, disk, and network information from system paths.
 - macOS: uses IOKit and CoreFoundation.
+
+## Hardware Property Sources
+
+`libhid` combines several platform-specific values before hashing them. The
+exact source values are intentionally not exposed as public API.
+
+Windows sources:
+
+- `Win32_ComputerSystemProduct.UUID`
+- `Win32_OperatingSystem.SerialNumber`
+- System drive `Win32_LogicalDisk.VolumeSerialNumber`
+- `Win32_ComputerSystemProduct.IdentifyingNumber`
+- `Win32_BaseBoard.SerialNumber`
+- Non-Microsoft network adapter MAC address
+
+Linux sources:
+
+- `/sys/class/dmi/id/product_uuid`
+- `/sys/class/dmi/id/product_serial`
+- `/sys/class/dmi/id/board_serial`
+- First matching `sda` or `hda` UUID from `/dev/disk/by-uuid/`
+- First matching `eth*` or `enp*` MAC address from `/sys/class/net/`
+
+macOS sources:
+
+- `IOPlatformSerialNumber`
+- `IOPlatformUUID`
+- `IOMACAddress`
+- Storage device `Serial Number`
+
+Known limitations:
+
+- Virtual machines, containers, and CI runners may expose incomplete or synthetic
+  hardware values.
+- Linux DMI files may require elevated permissions or may be unavailable.
+- Network interface naming can vary, especially on Linux.
+- Storage identifiers can change after disk replacement, repartitioning, or OS
+  reinstall.
+- macOS storage service names may vary across hardware generations.
 
 ## Public API
 
