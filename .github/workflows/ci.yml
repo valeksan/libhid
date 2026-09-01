@@ -24,6 +24,9 @@ on:
       - "src/**"
       - "tests/**"
 
+permissions:
+  contents: read
+
 jobs:
   cmake:
     name: ${{ matrix.os }} ${{ matrix.build_type }}
